@@ -5,8 +5,6 @@ USER root
 RUN pacman -Sy --noconfirm && pacman -S --noconfirm ansible curl git base-devel neovim
 
 
-
-
 FROM base AS prime
 ARG TAGS
 # Add group with GID 1000 only if it doesn't already exist
@@ -22,15 +20,6 @@ RUN if ! id -u galib > /dev/null 2>&1; then \
 # Lock the user's password to disable password login
 RUN passwd -l galib
 
-# Set up SSH directory and authorized keys (optional, if you need SSH access)
-RUN mkdir -p /home/galib/.ssh && \
-    chmod 700 /home/galib/.ssh && \
-    touch /home/galib/.ssh/authorized_keys && \
-    chmod 600 /home/galib/.ssh/authorized_keys && \
-    chown -R galib:galib /home/galib/.ssh
-
-# Add your SSH public key (replace with your actual public key) - optional
-RUN echo "ssh-rsa YOUR_PUBLIC_KEY_HERE" >> /home/galib/.ssh/authorized_keys
 
 # Switch back to the non-root user
 USER root

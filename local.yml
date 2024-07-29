@@ -1,5 +1,4 @@
----
-- name: Ensure Zsh is installed and set as default shell
+- name: Arch Setup
   hosts: localhost
   become: yes
   vars:
@@ -14,7 +13,6 @@
           - tmux
           - fzf
           - zoxide
-
         state: present
 
     - name: Change default shell to Zsh
