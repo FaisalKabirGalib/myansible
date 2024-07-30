@@ -1,0 +1,23 @@
+- name: Install packages
+  package:
+    name:
+      - stow
+      - tmux
+    state: present
+  tags:
+    - dotfiles
+    - install
+
+- name: Clone dotfiles repository
+  git:
+    repo: "https://github.com/FaisalKabirGalib/dotfiles.git" # Replace with your repository URL
+    dest: "/root/dotfiles"
+    version: main # You can specify a branch, tag, or commit here
+  tags:
+    - dotfiles
+
+- name: Stow dotfiles
+  shell: |
+    cd /root/dotfiles && stow .
+  tags:
+    - dotfiles

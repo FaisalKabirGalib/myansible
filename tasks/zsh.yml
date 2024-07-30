@@ -1,0 +1,19 @@
+- name: Install packages
+  package:
+    name:
+      - zsh
+      - tmux
+      - fzf
+      - zoxide
+    state: present
+  tags:
+    - zsh
+    - install
+
+- name: Change default shell to Zsh
+  user:
+    name: "{{ ansible_user }}"
+    shell: /bin/zsh
+
+  tags:
+    - zsh

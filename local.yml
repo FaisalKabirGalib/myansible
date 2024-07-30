@@ -4,29 +4,5 @@
   vars:
     ansible_user: root
   tasks:
-    - name: Install packages
-      pacman:
-        name:
-          - zsh
-          - alacritty
-          - stow
-          - tmux
-          - fzf
-          - zoxide
-        state: present
-
-    - name: Change default shell to Zsh
-      user:
-        name: "{{ ansible_user }}"
-        shell: /bin/zsh
-
-    - name: Clone dotfiles repository
-      git:
-        repo: "https://github.com/FaisalKabirGalib/dotfiles.git"  # Replace with your repository URL
-        dest: "/root/dotfiles"
-        version: main  # You can specify a branch, tag, or commit here
-
-    - name: Stow dotfiles
-      shell: |
-        cd /root/dotfiles && stow .
-
+    - include_tasks: tasks/dotfiles.yml
+    - include_tasks: tasks/zsh.yml
