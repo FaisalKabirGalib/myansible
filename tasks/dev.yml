@@ -1,0 +1,14 @@
+- name: Install Typescript Packages
+  package:
+    name:
+      - nodejs
+      - npm
+      - yarn
+      - typescript
+      - ts-node
+    state: present
+
+  tags:
+    - dev
+    - Install
+    - node

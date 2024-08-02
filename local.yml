@@ -7,5 +7,7 @@
     ansible_user: root
   tasks:
     - include_tasks: tasks/ssh.yml
+    - include_tasks: tasks/git_setup.yml
+    - include_tasks: tasks/dev.yml
     - include_tasks: tasks/dotfiles.yml
     - include_tasks: tasks/zsh.yml
