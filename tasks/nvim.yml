@@ -1,0 +1,10 @@
+- name: Install nvim dependency
+  package:
+    name:
+      - nodejs
+      - ripgrep
+      - lazygit
+    state: present
+  tags:
+    - nvim
+    - install

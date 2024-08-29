@@ -4,7 +4,10 @@
       - zsh
       - tmux
       - fzf
+      - fd
+      - eza
       - zoxide
+      - bat
     state: present
   tags:
     - zsh
