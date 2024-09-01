@@ -1,0 +1,14 @@
+- name: Install tmux plugins
+  package:
+    name: tmux
+    state: present
+  tags:
+    - tmux
+    - install
+
+- name: Clone TPM (Tmux Plugin Manager) if not already installed
+  git:
+    repo: https://github.com/tmux-plugins/tpm
+    dest: "{{ lookup('env','HOME') }}/.tmux/plugins/tpm"
+    version: master
+    update: no
