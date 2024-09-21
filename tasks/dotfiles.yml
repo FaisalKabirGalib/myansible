@@ -18,6 +18,6 @@
 
 - name: Stow dotfiles
   shell: |
-    cd "{{ lookup('env','HOME') }}/dotfiles" && stow .
+    cd "{{ lookup('env','HOME') }}/dotfiles" && ./stowup
   tags:
     - dotfiles
