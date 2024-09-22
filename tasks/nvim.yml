@@ -2,6 +2,7 @@
   package:
     name:
       - nodejs
+      - luarocks
       - ripgrep
       - lazygit
     state: present

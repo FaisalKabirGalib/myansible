@@ -1,7 +1,6 @@
 - name: Install Typescript Packages
   package:
     name:
-      - nodejs
       - npm
       - yarn
       - typescript
