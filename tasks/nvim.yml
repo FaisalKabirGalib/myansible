@@ -2,6 +2,7 @@
   package:
     name:
       - nodejs
+      - nvim
       - luarocks
       - ripgrep
       - lazygit

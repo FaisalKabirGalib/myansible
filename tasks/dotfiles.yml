@@ -2,7 +2,6 @@
   package:
     name:
       - stow
-      - tmux
     state: present
   tags:
     - dotfiles

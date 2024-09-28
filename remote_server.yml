@@ -1,0 +1,11 @@
+- name: Server Setup
+  hosts: localhost
+  become: yes
+  vars:
+    source_key: "./ssh/id_rsa"
+    dest_key: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa"
+  tasks:
+    - include_tasks: tasks/dotfiles.yml
+    - include_tasks: tasks/zsh.yml
+    - include_tasks: tasks/nvim.yml
+    - include_tasks: tasks/ssh.yml

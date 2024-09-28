@@ -2,7 +2,6 @@
   package:
     name:
       - zsh
-      - tmux
       - fzf
       - fd
       - eza
