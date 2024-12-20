@@ -12,7 +12,6 @@
     repo: "https://github.com/FaisalKabirGalib/dotfiles.git" # Replace with your repository URL
     dest: "{{ lookup('env','HOME') }}/dotfiles"
     version: main # You can specify a branch, tag, or commit here
-    ignore_errors: true
   tags:
     - dotfiles
 

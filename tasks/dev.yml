@@ -7,7 +7,6 @@
       - ts-node
       - go
       - tldr
-      - scc
       - duf
       - navi
 
