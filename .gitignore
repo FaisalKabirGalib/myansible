@@ -1,0 +1,7 @@
+# Claude Code local instructions
+CLAUDE.local.md
+
+# Ansible
+*.retry
+.vault_pass
+
