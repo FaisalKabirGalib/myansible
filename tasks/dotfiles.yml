@@ -18,5 +18,7 @@
 - name: Stow dotfiles
   shell: |
     cd "{{ lookup('env','HOME') }}/dotfiles" && ./stowup
+  args:
+    creates: "{{ lookup('env','HOME') }}/.zshrc"  # Prevents running if dotfiles are already stowed
   tags:
     - dotfiles

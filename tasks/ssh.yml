@@ -14,7 +14,7 @@
 - name: Ensure .ssh directory exists
   file:
     dest: "{{ dest_key | dirname }}"
-    mode: 0700
+    mode: '0700'
     state: directory
   tags:
     - ssh
@@ -24,7 +24,7 @@
   copy:
     src: "{{ source_key }}"
     dest: "{{ dest_key }}"
-    mode: 0600
+    mode: '0600'
   tags:
     - ssh
     - Install
@@ -33,7 +33,7 @@
   copy:
     src: "{{ source_key }}.pub"
     dest: "{{ dest_key }}.pub"
-    mode: 0644
+    mode: '0644'
   tags:
     - ssh
     - install
@@ -51,7 +51,7 @@
     responses:
       "Enter passphrase": "{{ ssh_passphrase }}"
       "Agent pid": "Agent started"
-    echo: yes
+    echo: true
   no_log: true
   when: ssh_passphrase is defined and ssh_passphrase != ""
   register: ssh_add_result

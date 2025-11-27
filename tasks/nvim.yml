@@ -10,4 +10,4 @@
   tags:
     - nvim
     - install
-  ignore_errors: true
+  failed_when: false
