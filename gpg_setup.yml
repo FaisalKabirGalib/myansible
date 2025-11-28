@@ -1,0 +1,7 @@
+---
+- name: GPG and Password Manager Setup
+  hosts: localhost
+  become: yes
+  connection: local
+  tasks:
+    - include_tasks: tasks/gpg_pass.yml
