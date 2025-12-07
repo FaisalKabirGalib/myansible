@@ -2,13 +2,9 @@
   package:
     name:
       - npm
-      - yarn
-      - typescript
-      - ts-node
       - go
       - tldr
-      - duf
-      - navi
+      - lazydocker
 
     state: present
 
