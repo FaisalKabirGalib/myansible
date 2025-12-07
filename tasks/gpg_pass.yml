@@ -36,7 +36,7 @@
       file:
         path: "{{ temp_key.dest }}"
         state: absent
-      become: false
+      become: true
       when: temp_key is defined and temp_key.dest is defined
 
 - name: Import GPG public key
