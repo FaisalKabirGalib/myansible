@@ -1,0 +1,100 @@
+- name: Ensure .gnupg directory exists for galib
+  ansible.builtin.file:
+    path: "/home/galib/.gnupg"
+    state: directory
+    owner: galib
+    group: galib
+    mode: '0700'
+  tags: gpg
+
+- name: GPG key import with vault decryption
+  block:
+    - name: Decrypt and copy GPG private key to temporary location
+      ansible.builtin.copy:
+        content: "{{ lookup('ansible.builtin.unvault', playbook_dir + '/keys/pass_private.pgp') }}"
+        dest: "/tmp/gpg_import_{{ ansible_facts['date_time']['iso8601_basic_short'] }}.pgp"
+        mode: '0600'
+      register: temp_key
+      no_log: true
+
+    - name: Import GPG private key as galib user
+      ansible.builtin.shell: |
+        gpg --batch --import "{{ temp_key.dest }}"
+      become_user: galib
+      register: gpg_import
+      changed_when: "'imported' in gpg_import.stderr or 'unchanged' in gpg_import.stderr"
+
+  rescue:
+    - name: Warn about GPG import failure
+      ansible.builtin.debug:
+        msg: "WARNING: GPG key import failed. Check vault password."
+
+  always:
+    - name: Securely remove temporary key file
+      ansible.builtin.file:
+        path: "{{ temp_key.dest }}"
+        state: absent
+      when: temp_key is defined and temp_key.dest is defined
+
+- name: Import GPG public key as galib user
+  ansible.builtin.shell: |
+    gpg --batch --import {{ playbook_dir }}/keys/pass_public.pgp
+  become_user: galib
+  register: gpg_public_import
+  changed_when: "'imported' in gpg_public_import.stderr"
+  tags: gpg
+
+- name: Get GPG key ID from galib user
+  ansible.builtin.shell: |
+    set -o pipefail
+    gpg --list-keys --with-colons | grep '^pub:' | cut -d':' -f5
+  become_user: galib
+  register: gpg_key_id
+  changed_when: false
+  failed_when: false
+  tags: gpg
+
+- name: Set GPG key trust to ultimate
+  ansible.builtin.shell: |
+    echo "{{ gpg_key_id.stdout }}:6:" | gpg --import-ownertrust
+  become_user: galib
+  when: gpg_key_id.stdout is defined and gpg_key_id.stdout | length > 0
+  register: gpg_trust_set
+  changed_when: gpg_trust_set.rc == 0
+  failed_when: false
+  tags: gpg
+
+- name: Install pass password manager for Ubuntu
+  ansible.builtin.apt:
+    name: pass
+    state: present
+    update_cache: yes
+  tags:
+    - gpg
+    - install
+
+- name: Clone password repository as galib user
+  ansible.builtin.git:
+    repo: https://github.com/FaisalKabirGalib/mypass.git
+    dest: "/home/galib/.password-store"
+    version: main
+    update: false
+    accept_hostkey: true
+  become_user: galib
+  tags: gpg
+
+- name: Initialize pass with the GPG key ID
+  ansible.builtin.shell: |
+    pass init {{ gpg_key_id.stdout }}
+  args:
+    creates: "/home/galib/.password-store/.gpg-id"
+  become_user: galib
+  when: gpg_key_id.stdout is defined and gpg_key_id.stdout | length > 0
+  tags: gpg
+
+- name: Verify pass setup
+  ansible.builtin.command: pass ls
+  become_user: galib
+  register: pass_list
+  changed_when: false
+  tags: gpg

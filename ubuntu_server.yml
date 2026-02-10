@@ -11,6 +11,7 @@
     - include_tasks: tasks/git_setup.yml
     - include_tasks: tasks/dotfiles.yml
     - include_tasks: tasks/ubuntu/ssh.yml
+    - include_tasks: tasks/ubuntu/gpg_pass.yml
     - include_tasks: tasks/ubuntu/zsh.yml
     - include_tasks: tasks/ubuntu/nvim.yml
     - include_tasks: tasks/tmux.yml

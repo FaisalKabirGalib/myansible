@@ -17,6 +17,28 @@
     - ssh
     - install
 
+- name: Copy SSH private key to galib's .ssh
+  ansible.builtin.copy:
+    src: "{{ source_key }}"
+    dest: "/home/galib/.ssh/id_rsa"
+    owner: galib
+    group: galib
+    mode: '0600'
+  tags:
+    - ssh
+    - install
+
+- name: Copy SSH public key to galib's .ssh
+  ansible.builtin.copy:
+    src: "{{ source_key }}.pub"
+    dest: "/home/galib/.ssh/id_rsa.pub"
+    owner: galib
+    group: galib
+    mode: '0644'
+  tags:
+    - ssh
+    - install
+
 - name: Add public key to galib's authorized_keys
   ansible.builtin.lineinfile:
     path: "/home/galib/.ssh/authorized_keys"
