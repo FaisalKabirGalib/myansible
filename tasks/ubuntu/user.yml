@@ -1,0 +1,27 @@
+- name: Create user galib
+  ansible.builtin.user:
+    name: galib
+    password: "{{ '1135' | password_hash('sha512') }}"
+    shell: /bin/bash
+    groups: sudo
+    append: yes
+    state: present
+  tags: user
+
+- name: Ensure .ssh directory exists for galib
+  ansible.builtin.file:
+    path: /home/galib/.ssh
+    state: directory
+    owner: galib
+    group: galib
+    mode: '0700'
+  tags: user
+
+- name: Add public key to galib's authorized_keys
+  ansible.builtin.copy:
+    src: "{{ source_key }}.pub"
+    dest: /home/galib/.ssh/authorized_keys
+    owner: galib
+    group: galib
+    mode: '0600'
+  tags: user

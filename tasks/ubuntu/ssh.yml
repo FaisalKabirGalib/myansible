@@ -1,0 +1,30 @@
+- name: Ensure .ssh directory exists for galib
+  ansible.builtin.file:
+    path: "/home/galib/.ssh"
+    state: directory
+    owner: galib
+    group: galib
+    mode: '0700'
+  tags:
+    - ssh
+    - install
+
+- name: Read public key content
+  ansible.builtin.slurp:
+    src: "{{ source_key }}.pub"
+  register: pub_key_content
+  tags:
+    - ssh
+    - install
+
+- name: Add public key to galib's authorized_keys
+  ansible.builtin.lineinfile:
+    path: "/home/galib/.ssh/authorized_keys"
+    line: "{{ pub_key_content.content | b64decode }}"
+    create: yes
+    owner: galib
+    group: galib
+    mode: '0600'
+  tags:
+    - ssh
+    - install

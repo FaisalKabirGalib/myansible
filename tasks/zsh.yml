@@ -24,7 +24,6 @@
       - zsh
       - fzf
       - fd-find # fd is called fd-find in Ubuntu
-      - exa # eza alternative
       - zoxide
       - bat
     state: present

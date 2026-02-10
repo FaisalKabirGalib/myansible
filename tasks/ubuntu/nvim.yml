@@ -1,0 +1,29 @@
+- name: Add Neovim PPA for latest version
+  ansible.builtin.apt_repository:
+    repo: ppa:neovim-ppa/stable
+    state: present
+    update_cache: yes
+  tags:
+    - nvim
+    - install
+  ignore_errors: true
+
+- name: Install nvim dependency
+  package:
+    name:
+      - nodejs
+      - neovim
+      - ripgrep
+    state: present
+  tags:
+    - nvim
+    - install
+
+- name: Install luarocks (not in Ubuntu repos - skip if fails)
+  package:
+    name: luarocks
+    state: present
+  tags:
+    - nvim
+    - install
+  ignore_errors: true

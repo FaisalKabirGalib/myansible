@@ -10,15 +10,15 @@
 - name: Clone dotfiles repository
   git:
     repo: "https://github.com/FaisalKabirGalib/dotfiles.git" # Replace with your repository URL
-    dest: "{{ lookup('env','HOME') }}/dotfiles"
+    dest: "/home/{{ username }}/dotfiles"
     version: server # You can specify a branch, tag, or commit here
   tags:
     - dotfiles
 
 - name: Stow dotfiles
   shell: |
-    cd "{{ lookup('env','HOME') }}/dotfiles" && ./stowup
+    cd "/home/{{ username }}/dotfiles" && ./stowup
   args:
-    creates: "{{ lookup('env','HOME') }}/.zshrc"  # Prevents running if dotfiles are already stowed
+    creates: "/home/{{ username }}/.zshrc"  # Prevents running if dotfiles are already stowed
   tags:
     - dotfiles

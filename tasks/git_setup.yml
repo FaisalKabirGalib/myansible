@@ -1,3 +1,20 @@
+- name: Check if git is installed
+  ansible.builtin.command: git --version
+  register: git_check
+  failed_when: false
+  changed_when: false
+  tags:
+    - git-personal
+
+- name: Install git if not available
+  ansible.builtin.package:
+    name: git
+    state: present
+  when: git_check.rc != 0
+  tags:
+    - git-personal
+    - install
+
 - name: Git personal setup email
   git_config:
     name: user.email
@@ -5,6 +22,7 @@
     value: "faisalkabirgalib@gmail.com"
   tags:
     - git-personal
+
 - name: Git personal setup name
   git_config:
     name: user.name

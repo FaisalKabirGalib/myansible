@@ -1,0 +1,23 @@
+FROM ubuntu:24.04 AS base
+ARG TAGS
+WORKDIR /usr/local/bin
+USER root
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install base packages
+RUN apt-get update && \
+    apt-get install -y ansible curl git software-properties-common neovim sudo && \
+    useradd -m -s /bin/bash -G sudo galib && \
+    echo 'galib:1135' | chpasswd && \
+    echo "galib ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/galib && \
+    chmod 0440 /etc/sudoers.d/galib
+
+FROM base AS prime
+ARG TAGS
+USER galib
+WORKDIR /home/galib
+ENV HOME=/home/galib
+
+FROM prime
+COPY --chown=galib:galib . .
+# No CMD - user runs playbook manually

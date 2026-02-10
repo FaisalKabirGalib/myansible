@@ -1,0 +1,10 @@
+- name: Install Typescript packages
+  package:
+    name:
+      - npm
+    state: present
+  tags:
+    - dev
+    - install
+  async: 300
+  poll: 10
