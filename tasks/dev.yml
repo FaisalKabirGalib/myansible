@@ -5,7 +5,6 @@
       - go
       - tldr
       - lazydocker
-
     state: present
 
   tags:
