@@ -12,4 +12,5 @@
     - include_tasks: tasks/tmux.yml
     - include_tasks: tasks/dev.yml
     - include_tasks: tasks/ssh.yml
+    - include_tasks: tasks/ssh_deploy_key.yml
     - include_tasks: tasks/gpg_pass.yml

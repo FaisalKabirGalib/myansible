@@ -1,0 +1,5 @@
+---
+- name: Add GitHub Actions Deploy Key
+  hosts: localhost
+  tasks:
+    - include_tasks: tasks/ssh_deploy_key.yml

@@ -5,3 +5,6 @@ CLAUDE.local.md
 *.retry
 .vault_pass
 
+# SSH Keys
+git_keys/
+
