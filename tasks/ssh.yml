@@ -6,6 +6,8 @@
   tags:
     - ssh
     - install
+    - ssh-only
+    - ssh-full
 
 - name: Install ssh key
   ansible.builtin.copy:
@@ -15,6 +17,8 @@
   tags:
     - ssh
     - install
+    - ssh-only
+    - ssh-full
 
 - name: Install ssh key public
   ansible.builtin.copy:
@@ -24,9 +28,13 @@
   tags:
     - ssh
     - install
+    - ssh-only
+    - ssh-full
 
 - name: Add ssh key to macOS Keychain
   ansible.builtin.shell: ssh-add --apple-use-keychain "{{ dest_key }}"
   tags:
     - ssh
     - install
+    - ssh-only
+    - ssh-full

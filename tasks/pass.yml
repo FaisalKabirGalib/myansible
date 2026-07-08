@@ -5,12 +5,16 @@
       - pass
       - pinentry-mac
     state: present
+  tags:
+    - pass
 
 - name: Ensure ~/.gnupg directory exists with correct permissions
   ansible.builtin.file:
     dest: "{{ lookup('env','HOME') }}/.gnupg"
     state: directory
     mode: "0700"
+  tags:
+    - pass
 
 - name: Configure gpg-agent to use pinentry-mac
   ansible.builtin.copy:
@@ -18,8 +22,12 @@
     content: |
       pinentry-program /opt/homebrew/bin/pinentry-mac
     mode: "0600"
+  tags:
+    - pass
 
 - name: Import pass GPG key and set trust to ultimate
+  tags:
+    - pass
   block:
     - name: Create a secure temp file for the private key
       ansible.builtin.tempfile:
