@@ -23,6 +23,7 @@
       - aerospace
       - raycast
       - font-caskaydia-mono-nerd-font
+      - font-jetbrains-mono-nerd-font
   tasks:
     - include_tasks: tasks/homebrew.yml
       tags: [homebrew, install]
