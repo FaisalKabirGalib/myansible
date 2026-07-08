@@ -1,0 +1,31 @@
+- name: Check if Xcode Command Line Tools are installed
+  ansible.builtin.stat:
+    path: /Library/Developer/CommandLineTools
+  register: clt_check
+
+- name: Fail with instructions if Xcode Command Line Tools are missing
+  ansible.builtin.fail:
+    msg: >-
+      Xcode Command Line Tools not found. Run `xcode-select --install`,
+      complete the GUI installer, then re-run this playbook. Ansible cannot
+      click through that dialog for you, so this must be done manually first.
+  when: not clt_check.stat.exists
+
+- name: Check if Homebrew is installed
+  ansible.builtin.stat:
+    path: /opt/homebrew/bin/brew
+  register: homebrew_check
+
+- name: Install Homebrew
+  ansible.builtin.shell: |
+    NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  when: not homebrew_check.stat.exists
+  tags:
+    - homebrew
+    - install
+
+- name: Update Homebrew
+  community.general.homebrew:
+    update_homebrew: true
+  tags:
+    - homebrew

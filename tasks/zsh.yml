@@ -1,9 +1,5 @@
-- name: Check if system is Arch Linux
-  ansible.builtin.command: cat /etc/os-release
-  register: os_release
-
-- name: Install package if archlinux
-  ansible.builtin.package:
+- name: Install shell utilities via Homebrew
+  community.general.homebrew:
     name:
       - zsh
       - fzf
@@ -11,25 +7,13 @@
       - eza
       - zoxide
       - bat
+      - python
+      - wget
+      - just
+      - shellcheck
+      - shfmt
+      - gitleaks
     state: present
-  when: '"Arch" in os_release.stdout'
   tags:
     - zsh
     - install
-  ignore_errors: true
-
-- name: Install packages for Ubuntu (alternative names for some packages)
-  ansible.builtin.package:
-    name:
-      - zsh
-      - fzf
-      - fd-find # fd is called fd-find in Ubuntu
-      - exa # eza alternative
-      - zoxide
-      - bat
-    state: present
-  when: '"Ubuntu" in os_release.stdout'
-  tags:
-    - zsh
-    - install
-  ignore_errors: true

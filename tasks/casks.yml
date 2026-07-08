@@ -1,0 +1,8 @@
+- name: Install GUI apps via Homebrew Cask
+  community.general.homebrew_cask:
+    name: "{{ mac_casks }}"
+    state: present
+  when: mac_casks | length > 0
+  tags:
+    - casks
+    - install

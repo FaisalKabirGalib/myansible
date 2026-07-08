@@ -1,0 +1,29 @@
+# Confident: verified against dotfiles gemini/PACKAGE.md
+- name: Install Gemini CLI via npm
+  community.general.npm:
+    name: "@google/gemini-cli"
+    global: true
+  tags:
+    - ai-cli
+    - install
+
+# Unverified: dotfiles PACKAGE.md confirms these tools' identities and config
+# targets, but not their install commands/package registry names. Convert each
+# to a real install task once confirmed, then delete its debug task.
+- name: "MANUAL STEP REQUIRED: install Antigravity CLI (agy, targets ~/.gemini/antigravity-cli/)"
+  ansible.builtin.debug:
+    msg: "Install command not yet verified — see dotfiles agy/PACKAGE.md for details."
+  tags:
+    - ai-cli-manual
+
+- name: "MANUAL STEP REQUIRED: install oh-my-pi / omp (pi, targets ~/.omp/agent/)"
+  ansible.builtin.debug:
+    msg: "Install command not yet verified — see dotfiles pi/PACKAGE.md for details."
+  tags:
+    - ai-cli-manual
+
+- name: "MANUAL STEP REQUIRED: install Opencode CLI (opencode, targets ~/.config/opencode)"
+  ansible.builtin.debug:
+    msg: "Install command not yet verified — see dotfiles opencode/PACKAGE.md for details. Also needs opencode/mcp-env.sh sourced for API keys (private, uncommitted file)."
+  tags:
+    - ai-cli-manual

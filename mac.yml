@@ -1,0 +1,39 @@
+- name: Mac Setup
+  hosts: localhost
+  become: false # Homebrew refuses to run as root; nothing else here needs sudo
+  environment:
+    PATH: "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:{{ ansible_facts.ansible_env.PATH }}"
+  vars:
+    source_key: "./ssh/id_rsa"
+    dest_key: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa"
+    # GUI apps to install via Homebrew Cask
+    mac_casks:
+      - ghostty
+      - kitty
+      - visual-studio-code
+      - obsidian
+      - zen
+      - font-caskaydia-mono-nerd-font
+  tasks:
+    - include_tasks: tasks/homebrew.yml
+      tags: [homebrew, install]
+    - include_tasks: tasks/git_setup.yml
+      tags: [git-personal]
+    - include_tasks: tasks/zsh.yml
+      tags: [zsh, install]
+    - include_tasks: tasks/zinit.yml
+      tags: [zinit, zsh, install]
+    - include_tasks: tasks/nvim.yml
+      tags: [nvim, install]
+    - include_tasks: tasks/tmux.yml
+      tags: [tmux, install]
+    - include_tasks: tasks/dev.yml
+      tags: [dev, install, node]
+    - include_tasks: tasks/dotfiles.yml
+      tags: [dotfiles, install]
+    - include_tasks: tasks/ai_cli.yml
+      tags: [ai-cli, install]
+    - include_tasks: tasks/casks.yml
+      tags: [casks, install]
+    - include_tasks: tasks/ssh.yml
+      tags: [ssh, install]

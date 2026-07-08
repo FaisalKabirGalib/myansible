@@ -1,0 +1,10 @@
+- name: Clone zinit (zsh plugin manager) if not already installed
+  ansible.builtin.git:
+    repo: https://github.com/zdharma-continuum/zinit.git
+    dest: "{{ lookup('env','HOME') }}/.local/share/zinit/zinit.git" # matches ZINIT_HOME default in dotfiles zsh/20-plugins.zsh
+    version: main
+    update: no
+  tags:
+    - zinit
+    - zsh
+    - install

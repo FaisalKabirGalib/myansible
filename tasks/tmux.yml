@@ -1,5 +1,5 @@
-- name: Install tmux plugins
-  package:
+- name: Install tmux via Homebrew
+  community.general.homebrew:
     name: tmux
     state: present
   tags:
@@ -7,8 +7,8 @@
     - install
 
 - name: Clone TPM (Tmux Plugin Manager) if not already installed
-  git:
+  ansible.builtin.git:
     repo: https://github.com/tmux-plugins/tpm
-    dest: "{{ lookup('env','HOME') }}/.tmux/plugins/tpm"
+    dest: "{{ lookup('env','HOME') }}/.config/tmux/plugins/tpm" # matches `run '~/.config/tmux/plugins/tpm/tpm'` in the dotfiles tmux.conf
     version: master
     update: no

@@ -1,22 +1,32 @@
-- name: Install packages
-  package:
-    name:
-      - stow
+- name: Install stow via Homebrew
+  community.general.homebrew:
+    name: stow
     state: present
   tags:
     - dotfiles
     - install
 
 - name: Clone dotfiles repository
-  git:
-    repo: "https://github.com/FaisalKabirGalib/dotfiles.git" # Replace with your repository URL
+  ansible.builtin.git:
+    repo: "https://github.com/FaisalKabirGalib/dotfiles.git"
     dest: "{{ lookup('env','HOME') }}/dotfiles"
-    version: main # You can specify a branch, tag, or commit here
+    version: mac-mini-m2 # macOS-adapted branch of `omarchy`; Wayland-only packages removed, vscode/ghostty/kitty paths fixed for macOS
   tags:
     - dotfiles
 
-- name: Stow dotfiles
-  shell: |
+- name: Stow dotfile packages
+  ansible.builtin.shell: |
     cd "{{ lookup('env','HOME') }}/dotfiles" && ./stowup
+  # No explicit package list needed: mac-mini-m2 only contains mac-safe packages.
   tags:
     - dotfiles
+
+- name: Bootstrap Neovim plugins headlessly (Lazy.nvim sync)
+  ansible.builtin.command:
+    cmd: nvim --headless "+Lazy! sync" +qa
+  changed_when: true
+  # nvim/install-plugins.sh is interactive (waits on `read` then opens a foreground
+  # TUI) and would hang Ansible forever; this is the headless equivalent.
+  tags:
+    - dotfiles
+    - nvim

@@ -1,7 +1,7 @@
-- name: Install nvim dependency
-  package:
+- name: Install nvim dependencies via Homebrew
+  community.general.homebrew:
     name:
-      - nodejs
+      - node
       - neovim
       - luarocks
       - ripgrep

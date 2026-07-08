@@ -1,18 +1,24 @@
-- name: Install Typescript Packages
-  package:
+- name: Install dev tools via Homebrew
+  community.general.homebrew:
     name:
-      - npm
+      - node
       - yarn
       - typescript
-      - ts-node
       - go
       - tldr
       - duf
       - navi
-
     state: present
-
   tags:
     - dev
-    - Install
+    - install
+    - node
+
+- name: Install ts-node via npm (no Homebrew formula)
+  community.general.npm:
+    name: ts-node
+    global: true
+  tags:
+    - dev
+    - install
     - node
