@@ -8,6 +8,9 @@
       - tldr
       - duf
       - navi
+      - gh
+      - jq
+      - mise
     state: present
   tags:
     - dev

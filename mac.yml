@@ -19,6 +19,9 @@
       - visual-studio-code
       - obsidian
       - zen
+      - orbstack
+      - aerospace
+      - raycast
       - font-caskaydia-mono-nerd-font
   tasks:
     - include_tasks: tasks/homebrew.yml

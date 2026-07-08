@@ -13,6 +13,8 @@
       - shellcheck
       - shfmt
       - gitleaks
+      - atuin
+      - btop
     state: present
   tags:
     - zsh

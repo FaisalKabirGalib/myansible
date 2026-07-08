@@ -1,3 +1,20 @@
+- name: Tap nikitabobko/tap (required for the aerospace cask)
+  community.general.homebrew_tap:
+    name: nikitabobko/tap
+    state: present
+  tags:
+    - casks
+    - install
+
+- name: Trust nikitabobko/tap (Homebrew refuses untrusted third-party casks otherwise)
+  ansible.builtin.command:
+    cmd: brew trust nikitabobko/tap
+  register: brew_trust_result
+  changed_when: "'Trusted tap' in brew_trust_result.stdout"
+  tags:
+    - casks
+    - install
+
 - name: Install GUI apps via Homebrew Cask
   community.general.homebrew_cask:
     name: "{{ mac_casks }}"
