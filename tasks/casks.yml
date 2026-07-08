@@ -19,6 +19,11 @@
   community.general.homebrew_cask:
     name: "{{ mac_casks }}"
     state: present
+    # Adopts apps already present at /Applications (e.g. installed manually
+    # before this playbook existed) into Homebrew's management instead of
+    # erroring out. Only replaces the app bundle itself, not user data/
+    # profiles (those live under ~/Library/Application Support/<app>, untouched).
+    install_options: force
   when: mac_casks | length > 0
   tags:
     - casks
