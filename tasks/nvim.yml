@@ -1,4 +1,4 @@
-- name: Install nvim dependencies via Homebrew
+- name: Install nvim dependencies via Homebrew (macOS)
   community.general.homebrew:
     name:
       - node
@@ -6,7 +6,34 @@
       - luarocks
       - ripgrep
       - lazygit
+      - lazydocker
     state: present
+  when: ansible_facts['os_family'] == "Darwin"
+  tags:
+    - nvim
+    - install
+  ignore_errors: true
+
+- name: Install nvim dependencies (Linux)
+  ansible.builtin.package:
+    name:
+      - nodejs
+      - neovim
+      - luarocks
+      - ripgrep
+      - lazygit
+    state: present
+  when: ansible_facts['os_family'] != "Darwin"
+  tags:
+    - nvim
+    - install
+  ignore_errors: true
+
+- name: Install lazydocker (Linux — package name unverified, may need an AUR helper on Arch)
+  ansible.builtin.package:
+    name: lazydocker
+    state: present
+  when: ansible_facts['os_family'] != "Darwin"
   tags:
     - nvim
     - install

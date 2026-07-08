@@ -1,0 +1,80 @@
+- name: Install gnupg, pass, and pinentry-mac via Homebrew
+  community.general.homebrew:
+    name:
+      - gnupg
+      - pass
+      - pinentry-mac
+    state: present
+
+- name: Ensure ~/.gnupg directory exists with correct permissions
+  ansible.builtin.file:
+    dest: "{{ lookup('env','HOME') }}/.gnupg"
+    state: directory
+    mode: "0700"
+
+- name: Configure gpg-agent to use pinentry-mac
+  ansible.builtin.copy:
+    dest: "{{ lookup('env','HOME') }}/.gnupg/gpg-agent.conf"
+    content: |
+      pinentry-program /opt/homebrew/bin/pinentry-mac
+    mode: "0600"
+
+- name: Import pass GPG key and set trust to ultimate
+  block:
+    - name: Create a secure temp file for the private key
+      ansible.builtin.tempfile:
+        suffix: .pgp
+      register: tmp_priv
+
+    - name: Create a secure temp file for the public key
+      ansible.builtin.tempfile:
+        suffix: .pgp
+      register: tmp_pub
+
+    - name: Decrypt and write the private key to the temp file
+      ansible.builtin.copy:
+        src: "{{ pass_gpg_private_key }}"
+        dest: "{{ tmp_priv.path }}"
+        mode: "0600"
+
+    - name: Copy the public key to the temp file
+      ansible.builtin.copy:
+        src: "{{ pass_gpg_public_key }}"
+        dest: "{{ tmp_pub.path }}"
+        mode: "0600"
+
+    - name: Read the key fingerprint without importing
+      ansible.builtin.shell: |
+        gpg --with-colons --import-options show-only --dry-run --import "{{ tmp_priv.path }}" | awk -F: '/^fpr:/ {print $10; exit}'
+      register: pass_gpg_fpr
+      changed_when: false
+
+    - name: Fail if a fingerprint could not be determined
+      ansible.builtin.fail:
+        msg: "Could not extract a GPG fingerprint from {{ pass_gpg_private_key }}"
+      when: pass_gpg_fpr.stdout | trim | length == 0
+
+    - name: Import the private key into the local GPG keyring
+      ansible.builtin.command:
+        cmd: gpg --batch --import "{{ tmp_priv.path }}"
+      changed_when: true
+
+    - name: Import the public key into the local GPG keyring
+      ansible.builtin.command:
+        cmd: gpg --batch --import "{{ tmp_pub.path }}"
+      changed_when: true
+
+    - name: Set the key's trust level to ultimate (max)
+      ansible.builtin.shell: |
+        echo "{{ pass_gpg_fpr.stdout | trim }}:6:" | gpg --batch --import-ownertrust
+      changed_when: true
+
+  always:
+    - name: Remove the temp key files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ tmp_priv.path | default('') }}"
+        - "{{ tmp_pub.path | default('') }}"
+      when: item | length > 0

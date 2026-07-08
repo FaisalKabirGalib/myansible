@@ -1,4 +1,4 @@
-- name: Install shell utilities via Homebrew
+- name: Install shell utilities via Homebrew (macOS)
   community.general.homebrew:
     name:
       - zsh
@@ -14,6 +14,39 @@
       - shfmt
       - gitleaks
     state: present
+  when: ansible_facts['os_family'] == "Darwin"
+  tags:
+    - zsh
+    - install
+
+- name: Install shell utilities (Arch Linux)
+  ansible.builtin.package:
+    name:
+      - zsh
+      - fzf
+      - fd
+      - eza
+      - zoxide
+      - bat
+    state: present
+  when: ansible_facts['os_family'] == "Archlinux"
+  ignore_errors: true
+  tags:
+    - zsh
+    - install
+
+- name: Install shell utilities (Ubuntu/Debian)
+  ansible.builtin.package:
+    name:
+      - zsh
+      - fzf
+      - fd-find # fd is called fd-find in Ubuntu
+      - exa # eza alternative
+      - zoxide
+      - bat
+    state: present
+  when: ansible_facts['os_family'] == "Debian"
+  ignore_errors: true
   tags:
     - zsh
     - install

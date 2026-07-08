@@ -17,6 +17,33 @@ mac: mac-deps
 mac-tags tags:
     ansible-playbook mac.yml --tags {{tags}}
 
+# install just the terminal bundle (zsh, tmux, nvim+lazygit+lazydocker, dotfiles,
+# and ghostty/kitty/wezterm casks) on the Mac
+terminal: mac-deps
+    ansible-playbook mac.yml --tags terminal
+
+# install just the terminal bundle (zsh, tmux, nvim+lazygit+lazydocker, dotfiles)
+# on the Arch machine -- no GUI terminal casks, doesn't apply on Linux
+terminal-local:
+    ansible-playbook local.yml --tags terminal --ask-vault-pass --ask-become-pass
+
+# install just the terminal bundle on a generic Linux server
+terminal-server:
+    ansible-playbook remote_server.yml --tags terminal --ask-vault-pass --ask-become-pass
+
+# set up only the personal id_rsa key (passphrase-protected -- safe for
+# shared/other machines, e.g. servers or other people's computers)
+ssh-only:
+    ansible-playbook mac.yml --ask-vault-pass --tags ssh-only
+
+# set up both id_rsa and the server key (full SSH setup -- trusted machines only)
+ssh-full:
+    ansible-playbook mac.yml --ask-vault-pass --tags ssh-full
+
+# import the pass GPG key (gnupg + pass + pinentry-mac) and set its trust to ultimate
+pass:
+    ansible-playbook mac.yml --ask-vault-pass --tags pass
+
 # copy server_key to ~/.ssh/
 server-key:
     ansible-playbook server_key.yml --ask-vault-pass --ask-become-pass

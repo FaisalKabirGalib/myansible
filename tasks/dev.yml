@@ -1,4 +1,4 @@
-- name: Install dev tools via Homebrew
+- name: Install dev tools via Homebrew (macOS)
   community.general.homebrew:
     name:
       - node
@@ -9,15 +9,35 @@
       - duf
       - navi
     state: present
+  when: ansible_facts['os_family'] == "Darwin"
   tags:
     - dev
     - install
     - node
 
-- name: Install ts-node via npm (no Homebrew formula)
+- name: Install ts-node via npm (macOS, no Homebrew formula)
   community.general.npm:
     name: ts-node
     global: true
+  when: ansible_facts['os_family'] == "Darwin"
+  tags:
+    - dev
+    - install
+    - node
+
+- name: Install dev tools (Linux)
+  ansible.builtin.package:
+    name:
+      - npm
+      - yarn
+      - typescript
+      - ts-node
+      - go
+      - tldr
+      - duf
+      - navi
+    state: present
+  when: ansible_facts['os_family'] != "Darwin"
   tags:
     - dev
     - install

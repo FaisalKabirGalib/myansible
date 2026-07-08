@@ -1,14 +1,39 @@
-- name: Install tmux via Homebrew
+- name: Install tmux via Homebrew (macOS)
   community.general.homebrew:
     name: tmux
     state: present
+  when: ansible_facts['os_family'] == "Darwin"
   tags:
     - tmux
     - install
 
-- name: Clone TPM (Tmux Plugin Manager) if not already installed
+- name: Install tmux (Linux)
+  ansible.builtin.package:
+    name: tmux
+    state: present
+  when: ansible_facts['os_family'] != "Darwin"
+  tags:
+    - tmux
+    - install
+
+- name: Clone TPM (Tmux Plugin Manager) if not already installed (macOS)
   ansible.builtin.git:
     repo: https://github.com/tmux-plugins/tpm
-    dest: "{{ lookup('env','HOME') }}/.config/tmux/plugins/tpm" # matches `run '~/.config/tmux/plugins/tpm/tpm'` in the dotfiles tmux.conf
+    dest: "{{ lookup('env','HOME') }}/.config/tmux/plugins/tpm" # matches `run '~/.config/tmux/plugins/tpm/tpm'` in the mac-mini-m2 dotfiles tmux.conf
     version: master
     update: no
+  when: ansible_facts['os_family'] == "Darwin"
+  tags:
+    - tmux
+    - install
+
+- name: Clone TPM (Tmux Plugin Manager) if not already installed (Linux)
+  ansible.builtin.git:
+    repo: https://github.com/tmux-plugins/tpm
+    dest: "{{ lookup('env','HOME') }}/.tmux/plugins/tpm" # the omarchy/main dotfiles branch sources TPM from ~/.tmux/plugins/tpm, not ~/.config/tmux
+    version: master
+    update: no
+  when: ansible_facts['os_family'] != "Darwin"
+  tags:
+    - tmux
+    - install

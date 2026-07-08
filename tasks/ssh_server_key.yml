@@ -1,0 +1,32 @@
+- name: Ensure .ssh directory exists
+  ansible.builtin.file:
+    dest: "{{ ssh_dir }}"
+    mode: "0700"
+    state: directory
+  tags:
+    - ssh-full
+    - never
+
+- name: Install server ssh key
+  ansible.builtin.copy:
+    src: "{{ server_key_source }}"
+    dest: "{{ server_key_dest }}"
+    mode: "0600"
+  tags:
+    - ssh-full
+    - never
+
+- name: Install server ssh key public
+  ansible.builtin.copy:
+    src: "{{ server_key_source }}.pub"
+    dest: "{{ server_key_dest }}.pub"
+    mode: "0644"
+  tags:
+    - ssh-full
+    - never
+
+- name: Add server ssh key to macOS Keychain
+  ansible.builtin.shell: ssh-add --apple-use-keychain "{{ server_key_dest }}"
+  tags:
+    - ssh-full
+    - never

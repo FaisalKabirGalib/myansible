@@ -4,12 +4,18 @@
   environment:
     PATH: "/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:{{ ansible_facts.ansible_env.PATH }}"
   vars:
+    ssh_dir: "{{ lookup('env', 'HOME') }}/.ssh"
     source_key: "./ssh/id_rsa"
-    dest_key: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa"
+    dest_key: "{{ ssh_dir }}/id_rsa"
+    server_key_source: "./ssh/server_key"
+    server_key_dest: "{{ ssh_dir }}/server_key"
+    pass_gpg_private_key: "./keys/pass_private.pgp"
+    pass_gpg_public_key: "./keys/pass_public.pgp"
     # GUI apps to install via Homebrew Cask
     mac_casks:
       - ghostty
       - kitty
+      - wezterm
       - visual-studio-code
       - obsidian
       - zen
@@ -20,20 +26,24 @@
     - include_tasks: tasks/git_setup.yml
       tags: [git-personal]
     - include_tasks: tasks/zsh.yml
-      tags: [zsh, install]
+      tags: [zsh, install, terminal]
     - include_tasks: tasks/zinit.yml
-      tags: [zinit, zsh, install]
+      tags: [zinit, zsh, install, terminal]
     - include_tasks: tasks/nvim.yml
-      tags: [nvim, install]
+      tags: [nvim, install, terminal]
     - include_tasks: tasks/tmux.yml
-      tags: [tmux, install]
+      tags: [tmux, install, terminal]
     - include_tasks: tasks/dev.yml
       tags: [dev, install, node]
     - include_tasks: tasks/dotfiles.yml
-      tags: [dotfiles, install]
+      tags: [dotfiles, install, terminal]
     - include_tasks: tasks/ai_cli.yml
       tags: [ai-cli, install]
     - include_tasks: tasks/casks.yml
-      tags: [casks, install]
+      tags: [casks, install, terminal]
     - include_tasks: tasks/ssh.yml
-      tags: [ssh, install]
+      tags: [ssh-only, ssh-full, never]
+    - include_tasks: tasks/ssh_server_key.yml
+      tags: [ssh-full, never]
+    - include_tasks: tasks/pass.yml
+      tags: [pass, never]
