@@ -6,9 +6,27 @@
     - tmux
     - install
 
+# macOS ships bash 3.2 (last GPLv2 release) as /bin/bash. Some TPM plugins
+# (e.g. tmux-powerkit) use bash 4+ syntax (declare -g, ${var^^}) and their
+# #!/usr/bin/env bash shebang silently picks up the ancient system bash
+# unless a newer one is installed and ahead of it on PATH. Homebrew's bin
+# dirs are already first in PATH (see mac.yml `environment.PATH`), so no
+# further PATH changes are needed here.
+- name: Install modern bash via Homebrew (system bash 3.2 breaks bash4+ TPM plugins)
+  community.general.homebrew:
+    name: bash
+    state: present
+  tags:
+    - tmux
+    - install
+
 - name: Clone TPM (Tmux Plugin Manager) if not already installed
   ansible.builtin.git:
     repo: https://github.com/tmux-plugins/tpm
     dest: "{{ lookup('env','HOME') }}/.config/tmux/plugins/tpm" # matches `run '~/.config/tmux/plugins/tpm/tpm'` in the mac-mini-m2 dotfiles tmux.conf
     version: master
     update: no
+  tags:
+    - tmux
+    - install
+    - terminal

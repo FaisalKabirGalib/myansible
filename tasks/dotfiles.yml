@@ -21,6 +21,16 @@
   tags:
     - dotfiles
 
+- name: Install tmux plugins via TPM
+  ansible.builtin.command:
+    cmd: "{{ lookup('env','HOME') }}/.config/tmux/plugins/tpm/bin/install_plugins"
+  # TPM's install script reads ~/.config/tmux/tmux.conf directly and doesn't need
+  # a running tmux server, but the conf only exists once dotfiles are stowed above.
+  changed_when: true
+  tags:
+    - dotfiles
+    - tmux
+
 - name: Bootstrap Neovim plugins headlessly (Lazy.nvim sync)
   ansible.builtin.command:
     cmd: nvim --headless "+Lazy! sync" +qa

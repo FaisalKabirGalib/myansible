@@ -22,6 +22,10 @@ mac-tags tags:
 terminal: mac-deps
     ansible-playbook mac.yml --tags terminal
 
+# install/configure tmux, TPM, and its plugins (needs dotfiles stowed for tmux.conf)
+tmux: mac-deps
+    ansible-playbook mac.yml --tags tmux
+
 # set up only the personal id_rsa key (passphrase-protected -- safe for
 # shared/other machines, e.g. servers or other people's computers)
 ssh-only:

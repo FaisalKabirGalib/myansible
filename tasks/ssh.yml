@@ -31,8 +31,58 @@
     - ssh-only
     - ssh-full
 
-- name: Add ssh key to macOS Keychain
+- name: Ensure pexpect is available for the expect module
+  ansible.builtin.command: "{{ ansible_playbook_python }} -m pip install --quiet pexpect"
+  changed_when: false
+  tags:
+    - ssh
+    - install
+    - ssh-only
+    - ssh-full
+
+- name: Prompt for SSH key passphrase
+  ansible.builtin.pause:
+    prompt: "Enter passphrase for {{ dest_key }} (leave blank if the key has none)"
+    echo: false
+  register: ssh_passphrase_prompt
+  when: ssh_passphrase is not defined
+  tags:
+    - ssh
+    - install
+    - ssh-only
+    - ssh-full
+
+- name: Set ssh_passphrase from prompt
+  ansible.builtin.set_fact:
+    ssh_passphrase: "{{ ssh_passphrase_prompt.user_input | default('') }}"
+  no_log: true
+  when: ssh_passphrase is not defined
+  tags:
+    - ssh
+    - install
+    - ssh-only
+    - ssh-full
+
+- name: Add ssh key to macOS Keychain with passphrase
+  ansible.builtin.expect:
+    command: ssh-add --apple-use-keychain "{{ dest_key }}"
+    responses:
+      "Enter passphrase": "{{ ssh_passphrase }}"
+    echo: true
+  no_log: true
+  when: ssh_passphrase is defined and ssh_passphrase != ""
+  register: ssh_add_result
+  failed_when: ssh_add_result.rc != 0 and "already added" not in ssh_add_result.stderr
+  tags:
+    - ssh
+    - install
+    - ssh-only
+    - ssh-full
+
+- name: Add ssh key to macOS Keychain (no passphrase configured)
   ansible.builtin.shell: ssh-add --apple-use-keychain "{{ dest_key }}"
+  when: ssh_passphrase is not defined or ssh_passphrase == ""
+  ignore_errors: true
   tags:
     - ssh
     - install

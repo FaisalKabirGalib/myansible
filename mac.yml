@@ -40,7 +40,7 @@
     - include_tasks: tasks/dev.yml
       tags: [dev, install, node]
     - include_tasks: tasks/dotfiles.yml
-      tags: [dotfiles, install, terminal]
+      tags: [dotfiles, install, terminal, nvim, tmux]
     - include_tasks: tasks/ai_cli.yml
       tags: [ai-cli, install]
     - include_tasks: tasks/casks.yml
