@@ -6,10 +6,6 @@
     dest_key: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa"
   tasks:
     - include_tasks: tasks/dotfiles.yml
-      tags: [dotfiles, install, terminal]
     - include_tasks: tasks/zsh.yml
-      tags: [zsh, install, terminal]
     - include_tasks: tasks/nvim.yml
-      tags: [nvim, install, terminal]
     - include_tasks: tasks/ssh.yml
-      tags: [ssh, install]

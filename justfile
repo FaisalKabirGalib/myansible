@@ -22,15 +22,6 @@ mac-tags tags:
 terminal: mac-deps
     ansible-playbook mac.yml --tags terminal
 
-# install just the terminal bundle (zsh, tmux, nvim+lazygit+lazydocker, dotfiles)
-# on the Arch machine -- no GUI terminal casks, doesn't apply on Linux
-terminal-local:
-    ansible-playbook local.yml --tags terminal --ask-vault-pass --ask-become-pass
-
-# install just the terminal bundle on a generic Linux server
-terminal-server:
-    ansible-playbook remote_server.yml --tags terminal --ask-vault-pass --ask-become-pass
-
 # set up only the personal id_rsa key (passphrase-protected -- safe for
 # shared/other machines, e.g. servers or other people's computers)
 ssh-only:

@@ -1,64 +1,32 @@
-- name: Install stow via Homebrew (macOS)
+- name: Install stow via Homebrew
   community.general.homebrew:
     name: stow
     state: present
-  when: ansible_facts['os_family'] == "Darwin"
   tags:
     - dotfiles
     - install
 
-- name: Install stow (Linux)
-  ansible.builtin.package:
-    name: stow
-    state: present
-  when: ansible_facts['os_family'] != "Darwin"
-  tags:
-    - dotfiles
-    - install
-
-- name: Clone dotfiles repository (macOS)
+- name: Clone dotfiles repository
   ansible.builtin.git:
     repo: "https://github.com/FaisalKabirGalib/dotfiles.git"
     dest: "{{ lookup('env','HOME') }}/dotfiles"
     version: mac-mini-m2 # macOS-adapted branch of `omarchy`; Wayland-only packages removed, vscode/ghostty/kitty paths fixed for macOS
-  when: ansible_facts['os_family'] == "Darwin"
   tags:
     - dotfiles
 
-- name: Clone dotfiles repository (Linux)
-  ansible.builtin.git:
-    repo: "https://github.com/FaisalKabirGalib/dotfiles.git"
-    dest: "{{ lookup('env','HOME') }}/dotfiles"
-    version: main # main has no PACKAGE.md convention / stowup script, only a plain package list
-  when: ansible_facts['os_family'] != "Darwin"
-  tags:
-    - dotfiles
-
-- name: Stow dotfile packages (macOS)
+- name: Stow dotfile packages
   ansible.builtin.shell: |
     cd "{{ lookup('env','HOME') }}/dotfiles" && ./stowup
   # No explicit package list needed: mac-mini-m2 only contains mac-safe packages.
-  when: ansible_facts['os_family'] == "Darwin"
   tags:
     - dotfiles
 
-- name: Stow dotfile packages (Linux)
-  ansible.builtin.shell: |
-    cd "{{ lookup('env','HOME') }}/dotfiles" && stow .
-  # main branch has no stowup script or PACKAGE.md convention, so bare `stow .` is used.
-  when: ansible_facts['os_family'] != "Darwin"
-  tags:
-    - dotfiles
-
-- name: Bootstrap Neovim plugins headlessly (Lazy.nvim sync, macOS only)
+- name: Bootstrap Neovim plugins headlessly (Lazy.nvim sync)
   ansible.builtin.command:
     cmd: nvim --headless "+Lazy! sync" +qa
   changed_when: true
   # nvim/install-plugins.sh is interactive (waits on `read` then opens a foreground
-  # TUI) and would hang Ansible forever; this is the headless equivalent. Scoped to
-  # Darwin only to keep this regression fix a pure restoration of prior Linux
-  # behavior, which never invoked nvim from this file.
-  when: ansible_facts['os_family'] == "Darwin"
+  # TUI) and would hang Ansible forever; this is the headless equivalent.
   tags:
     - dotfiles
     - nvim

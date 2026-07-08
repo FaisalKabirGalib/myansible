@@ -25,27 +25,8 @@
     - ssh
     - install
 
-- name: Install OpenSSH tools (Linux)
-  ansible.builtin.package:
-    name: openssh
-    state: present
-  when: ansible_facts['os_family'] != "Darwin"
-  tags:
-    - ssh
-    - install
-
 - name: Add ssh key to macOS Keychain
   ansible.builtin.shell: ssh-add --apple-use-keychain "{{ dest_key }}"
-  when: ansible_facts['os_family'] == "Darwin"
-  tags:
-    - ssh
-    - install
-
-- name: Add ssh key to ssh-agent (Linux)
-  ansible.builtin.shell: |
-    eval "$(ssh-agent -s)"
-    ssh-add "{{ dest_key }}"
-  when: ansible_facts['os_family'] != "Darwin"
   tags:
     - ssh
     - install
