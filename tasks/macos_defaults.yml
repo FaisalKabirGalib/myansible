@@ -1,0 +1,29 @@
+- name: Disable press-and-hold accent popup (it swallows key-repeat in terminals/nvim)
+  community.general.osx_defaults:
+    domain: NSGlobalDomain
+    key: ApplePressAndHoldEnabled
+    type: bool
+    value: false
+  tags:
+    - macos-defaults
+    - install
+
+- name: Set fast key repeat rate
+  community.general.osx_defaults:
+    domain: NSGlobalDomain
+    key: KeyRepeat
+    type: int
+    value: 2
+  tags:
+    - macos-defaults
+    - install
+
+- name: Set short initial key repeat delay
+  community.general.osx_defaults:
+    domain: NSGlobalDomain
+    key: InitialKeyRepeat
+    type: int
+    value: 15
+  tags:
+    - macos-defaults
+    - install

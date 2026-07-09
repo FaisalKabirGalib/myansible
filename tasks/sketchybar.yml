@@ -1,0 +1,118 @@
+# SketchyBar: menu-bar workspace/window overview for AeroSpace (no native
+# equivalent to Hyprland's overview / GNOME Activities, see dotfiles
+# sketchybar/PACKAGE.md). Tap+formula pattern matches tasks/casks.yml.
+- name: Tap FelixKratz/formulae (required for the sketchybar formula)
+  community.general.homebrew_tap:
+    name: FelixKratz/formulae
+    state: present
+  tags:
+    - sketchybar
+    - install
+
+- name: Install SketchyBar via Homebrew
+  community.general.homebrew:
+    name: FelixKratz/formulae/sketchybar
+    state: present
+  tags:
+    - sketchybar
+    - install
+
+# Confident: verified lua is required to run the Lua sketchybarrc's
+# #!/usr/bin/env lua shebang. SbarLua itself vendors its own Lua 5.5.0
+# source and does not depend on this Homebrew lua at build time -- this is
+# purely for the interpreter that runs sketchybarrc.
+- name: Install Lua via Homebrew (interpreter for the Lua sketchybarrc)
+  community.general.homebrew:
+    name: lua
+    state: present
+  tags:
+    - sketchybar
+    - install
+
+# Confident: verified against SbarLua's own makefile (NAME=sketchybar,
+# INSTALL_DIR=$HOME/.local/share/sketchybar_lua, install target does
+# `mkdir -p $(INSTALL_DIR) && mv bin/$(NAME).so $(INSTALL_DIR)`).
+- name: Check if SbarLua's compiled module is already installed
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.local/share/sketchybar_lua/sketchybar.so"
+  register: sbarlua_module_check
+  tags:
+    - sketchybar
+    - install
+
+- name: Build and install SbarLua (Lua bindings for the sketchybar CLI)
+  ansible.builtin.shell: |
+    git clone https://github.com/FelixKratz/SbarLua.git /tmp/SbarLua && \
+    cd /tmp/SbarLua/ && make install && \
+    rm -rf /tmp/SbarLua/
+  when: not sbarlua_module_check.stat.exists
+  changed_when: true
+  tags:
+    - sketchybar
+    - install
+
+- name: Check if sketchybar-app-font is already installed
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/Library/Fonts/sketchybar-app-font.ttf"
+  register: sketchybar_app_font_check
+  tags:
+    - sketchybar
+    - install
+
+# Confident: verified latest release tag via
+# `gh api repos/kvndrsslr/sketchybar-app-font/releases/latest` (v2.0.62 at
+# time of writing -- falleco's own setup.sh pins an older v2.0.25).
+- name: Install sketchybar-app-font (per-app icons in the workspace bar)
+  ansible.builtin.get_url:
+    url: https://github.com/kvndrsslr/sketchybar-app-font/releases/download/v2.0.62/sketchybar-app-font.ttf
+    dest: "{{ ansible_env.HOME }}/Library/Fonts/sketchybar-app-font.ttf"
+  when: not sketchybar_app_font_check.stat.exists
+  tags:
+    - sketchybar
+    - install
+
+- name: Install switchaudio-osx via Homebrew (audio device switching for the volume widget popup)
+  community.general.homebrew:
+    name: switchaudio-osx
+    state: present
+  tags:
+    - sketchybar
+    - install
+
+- name: Install blueutil via Homebrew (Bluetooth power/pair/connect for the bluetooth widget)
+  community.general.homebrew:
+    name: blueutil
+    state: present
+  tags:
+    - sketchybar
+    - install
+
+# Build the two C event-provider binaries (CPU load + network throughput).
+# `chdir` targets the stowed config dir -- tasks/dotfiles.yml (which stows
+# this repo) already ran earlier in mac.yml's task list, so this source
+# exists by the time this task runs. `creates:` on one binary is sufficient
+# for idempotency since the top-level makefile's `all` target builds both
+# cpu_load and network_load together in one invocation.
+- name: Build sketchybar C event-provider helpers (cpu_load, network_load)
+  ansible.builtin.command:
+    cmd: make
+    chdir: "{{ ansible_env.HOME }}/.config/sketchybar/helpers/event_providers"
+    creates: "{{ ansible_env.HOME }}/.config/sketchybar/helpers/event_providers/cpu_load/bin/cpu_load"
+  tags:
+    - sketchybar
+    - install
+
+# CHANGED from `brew services start` to `brew services restart`: sketchybar
+# is already running (old bash config, or a previous Lua version) by the
+# time this playbook re-runs; `start` on an already-running service is a
+# no-op and would leave the stale config active instead of picking up
+# whatever changed in sketchybarrc.
+- name: Restart SketchyBar as a background service (picks up the current sketchybarrc from dotfiles stow)
+  ansible.builtin.command:
+    cmd: brew services restart sketchybar
+  register: sketchybar_service
+  changed_when: "'Successfully started' in sketchybar_service.stdout"
+  tags:
+    - sketchybar
+    - install
+    - terminal

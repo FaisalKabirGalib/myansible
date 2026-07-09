@@ -1,0 +1,17 @@
+- name: Install extra CLI utilities via Homebrew
+  community.general.homebrew:
+    name:
+      - git-delta # side-by-side syntax-highlighted git diff pager (see tasks/git_setup.yml for wiring)
+      - dust # du replacement with a visual usage tree
+      - hyperfine # command-line benchmarking
+      - ncdu # interactive disk usage analyzer
+      - yq # YAML/XML/TOML processor (jq-like syntax)
+      - glow # renders markdown in the terminal
+      - sd # simpler sed alternative
+      - fx # interactive JSON viewer
+      - xh # httpie-like HTTP client
+    state: present
+  tags:
+    - cli-extras
+    - install
+    - terminal

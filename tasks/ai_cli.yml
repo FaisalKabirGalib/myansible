@@ -7,23 +7,45 @@
     - ai-cli
     - install
 
-# Unverified: dotfiles PACKAGE.md confirms these tools' identities and config
-# targets, but not their install commands/package registry names. Convert each
-# to a real install task once confirmed, then delete its debug task.
-- name: "MANUAL STEP REQUIRED: install Antigravity CLI (agy, targets ~/.gemini/antigravity-cli/)"
-  ansible.builtin.debug:
-    msg: "Install command not yet verified — see dotfiles agy/PACKAGE.md for details."
-  tags:
-    - ai-cli-manual
+# Note: `agy` (Antigravity CLI, targets ~/.gemini/antigravity-cli/) is the
+# same `gemini` binary installed above — no separate install needed.
 
-- name: "MANUAL STEP REQUIRED: install oh-my-pi / omp (pi, targets ~/.omp/agent/)"
-  ansible.builtin.debug:
-    msg: "Install command not yet verified — see dotfiles pi/PACKAGE.md for details."
+# Confident: verified against dotfiles bin/.local/bin/omp wrapper script,
+# which reads PKG="@oh-my-pi/pi-coding-agent" and requires the bun-linked
+# bundle at ~/.bun/bin/omp.
+- name: Check if omp (oh-my-pi) bun bundle is linked
+  ansible.builtin.stat:
+    path: "{{ ansible_env.HOME }}/.bun/bin/omp"
+  register: omp_bin_check
   tags:
-    - ai-cli-manual
+    - ai-cli
+    - install
 
-- name: "MANUAL STEP REQUIRED: install Opencode CLI (opencode, targets ~/.config/opencode)"
-  ansible.builtin.debug:
-    msg: "Install command not yet verified — see dotfiles opencode/PACKAGE.md for details. Also needs opencode/mcp-env.sh sourced for API keys (private, uncommitted file)."
+- name: Install/link omp (oh-my-pi) via bun (targets ~/.omp/agent/)
+  ansible.builtin.command:
+    cmd: bun install -g @oh-my-pi/pi-coding-agent@latest
+  when: not omp_bin_check.stat.exists
   tags:
-    - ai-cli-manual
+    - ai-cli
+    - install
+
+# Confident: verified against https://opencode.ai/docs official install
+# methods; brew tap matches this playbook's existing tap pattern (see
+# tasks/casks.yml). opencode/mcp-env.sh (private, uncommitted dotfiles file)
+# still needs to be sourced manually for MCP API keys — that's a secret, not
+# something ansible should manage.
+- name: Tap anomalyco/tap (required for the opencode formula)
+  community.general.homebrew_tap:
+    name: anomalyco/tap
+    state: present
+  tags:
+    - ai-cli
+    - install
+
+- name: Install Opencode CLI via Homebrew (targets ~/.config/opencode)
+  community.general.homebrew:
+    name: anomalyco/tap/opencode
+    state: present
+  tags:
+    - ai-cli
+    - install

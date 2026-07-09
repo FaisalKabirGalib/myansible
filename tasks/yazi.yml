@@ -1,0 +1,13 @@
+- name: Install yazi and its optional preview/archive dependencies via Homebrew
+  community.general.homebrew:
+    name:
+      - yazi
+      - ffmpeg # video thumbnails
+      - poppler # pdf previews
+      - sevenzip # archive previews/extraction
+      - jq # json previews
+    state: present
+  tags:
+    - yazi
+    - install
+    - terminal

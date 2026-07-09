@@ -86,3 +86,10 @@
         - "{{ tmp_priv.path | default('') }}"
         - "{{ tmp_pub.path | default('') }}"
       when: item | length > 0
+
+- name: Clone mypass repository into the pass password store
+  ansible.builtin.git:
+    repo: "https://github.com/FaisalKabirGalib/mypass.git"
+    dest: "{{ lookup('env','HOME') }}/.password-store"
+  tags:
+    - pass

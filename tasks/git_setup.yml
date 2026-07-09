@@ -12,3 +12,44 @@
     value: "Faisal Kabir Galib"
   tags:
     - git-personal
+
+# Wires up git-delta (installed via tasks/cli_extras.yml) as git's diff pager.
+- name: Use delta as git's diff/interactive pager
+  git_config:
+    name: core.pager
+    scope: global
+    value: delta
+  tags:
+    - git-personal
+
+- name: Use delta as git's interactive diff filter (for add -p etc.)
+  git_config:
+    name: interactive.diffFilter
+    scope: global
+    value: "delta --color-only"
+  tags:
+    - git-personal
+
+- name: Enable delta's n/N navigation between diff sections
+  git_config:
+    name: delta.navigate
+    scope: global
+    value: "true"
+  tags:
+    - git-personal
+
+- name: Enable delta's side-by-side diff view
+  git_config:
+    name: delta.side-by-side
+    scope: global
+    value: "true"
+  tags:
+    - git-personal
+
+- name: Use zdiff3 merge conflict style (adds common-ancestor context to conflicts)
+  git_config:
+    name: merge.conflictstyle
+    scope: global
+    value: zdiff3
+  tags:
+    - git-personal

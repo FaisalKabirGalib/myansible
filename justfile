@@ -26,6 +26,10 @@ terminal: mac-deps
 tmux: mac-deps
     ansible-playbook mac.yml --tags tmux
 
+# install extra CLI utilities (git-delta, dust, hyperfine, ncdu, yq, glow, sd, fx, xh)
+cli-extras: mac-deps
+    ansible-playbook mac.yml --tags cli-extras
+
 # set up only the personal id_rsa key (passphrase-protected -- safe for
 # shared/other machines, e.g. servers or other people's computers)
 ssh-only:
@@ -35,7 +39,8 @@ ssh-only:
 ssh-full:
     ansible-playbook mac.yml --ask-vault-pass --tags ssh-full
 
-# import the pass GPG key (gnupg + pass + pinentry-mac) and set its trust to ultimate
+# set up pass end-to-end: install gnupg/pass/pinentry-mac, import + trust the GPG
+# key, and clone mypass into ~/.password-store
 pass:
     ansible-playbook mac.yml --ask-vault-pass --tags pass
 
