@@ -24,7 +24,11 @@
       - raycast
       - font-caskaydia-mono-nerd-font
       - font-jetbrains-mono-nerd-font
+      - font-maple-mono-nf
+      - font-monaspace
   tasks:
+    - include_tasks: tasks/macos_defaults.yml
+      tags: [macos-defaults, install, terminal]
     - include_tasks: tasks/homebrew.yml
       tags: [homebrew, install]
     - include_tasks: tasks/git_setup.yml
@@ -37,14 +41,22 @@
       tags: [nvim, install, terminal]
     - include_tasks: tasks/tmux.yml
       tags: [tmux, install, terminal]
+    - include_tasks: tasks/yazi.yml
+      tags: [yazi, install, terminal]
+    - include_tasks: tasks/cli_extras.yml
+      tags: [cli-extras, install, terminal]
     - include_tasks: tasks/dev.yml
       tags: [dev, install, node]
+    - include_tasks: tasks/flutter.yml
+      tags: [flutter, dev, install]
     - include_tasks: tasks/dotfiles.yml
-      tags: [dotfiles, install, terminal, nvim, tmux]
+      tags: [dotfiles, install, terminal, nvim, tmux, yazi]
     - include_tasks: tasks/ai_cli.yml
       tags: [ai-cli, install]
     - include_tasks: tasks/casks.yml
       tags: [casks, install, terminal]
+    - include_tasks: tasks/sketchybar.yml
+      tags: [sketchybar, install, terminal]
     - include_tasks: tasks/ssh.yml
       tags: [ssh-only, ssh-full, never]
     - include_tasks: tasks/ssh_server_key.yml

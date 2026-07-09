@@ -1,0 +1,80 @@
+- name: Get Homebrew prefix
+  ansible.builtin.command:
+    cmd: brew --prefix
+  register: brew_prefix_cmd
+  changed_when: false
+  tags:
+    - flutter
+    - dev
+    - install
+
+- name: Set Homebrew prefix variable
+  ansible.builtin.set_fact:
+    brew_prefix: "{{ brew_prefix_cmd.stdout }}"
+  tags:
+    - flutter
+    - dev
+    - install
+
+- name: Install OpenJDK via Homebrew
+  community.general.homebrew:
+    name: openjdk
+    state: present
+  tags:
+    - flutter
+    - dev
+    - install
+
+- name: Install Flutter and Android command-line tools
+  community.general.homebrew_cask:
+    name:
+      - flutter
+      - android-commandlinetools
+    state: present
+    install_options: force
+  tags:
+    - flutter
+    - dev
+    - install
+
+- name: Configure Flutter Android SDK path
+  ansible.builtin.command:
+    cmd: flutter config --android-sdk "{{ brew_prefix }}/share/android-commandlinetools"
+  changed_when: false
+  tags:
+    - flutter
+    - dev
+    - install
+
+- name: Configure Flutter JDK path
+  ansible.builtin.command:
+    cmd: flutter config --jdk-dir "{{ brew_prefix }}/opt/openjdk"
+  changed_when: false
+  tags:
+    - flutter
+    - dev
+    - install
+
+- name: Install required Android SDK components
+  ansible.builtin.shell:
+    cmd: yes | sdkmanager "platform-tools" "build-tools;34.0.0" "build-tools;28.0.3" "platforms;android-34" "platforms;android-36"
+  environment:
+    ANDROID_HOME: "{{ brew_prefix }}/share/android-commandlinetools"
+    PATH: "{{ brew_prefix }}/opt/openjdk/bin:{{ brew_prefix }}/share/android-commandlinetools/cmdline-tools/latest/bin:{{ ansible_facts.ansible_env.PATH }}"
+  changed_when: false
+  tags:
+    - flutter
+    - dev
+    - install
+
+- name: Accept Android SDK licenses
+  ansible.builtin.shell:
+    cmd: yes | flutter doctor --android-licenses
+  environment:
+    ANDROID_HOME: "{{ brew_prefix }}/share/android-commandlinetools"
+    PATH: "{{ brew_prefix }}/opt/openjdk/bin:{{ brew_prefix }}/share/android-commandlinetools/cmdline-tools/latest/bin:{{ ansible_facts.ansible_env.PATH }}"
+  changed_when: false
+  tags:
+    - flutter
+    - dev
+    - install
