@@ -114,3 +114,20 @@ git clone --branch server --single-branch https://github.com/FaisalKabirGalib/my
 cd ~/myansible
 ansible-playbook site.yml --limit arch-dev -c local -e manage_personal_keys=true --ask-vault-pass
 ```
+
+## Install after a reset
+
+Download the installer on arch-dev and run it as galib:
+
+```sh
+curl -fsSL -o /tmp/install-arch-dev.sh \
+  https://raw.githubusercontent.com/FaisalKabirGalib/myansible/server/scripts/install-arch-dev.sh
+bash /tmp/install-arch-dev.sh --verify
+```
+
+The installer restores Git if missing, clones or fast-forwards the public server branch, installs the pinned
+collections, and runs the full playbook with a vault prompt. It requires the preserved `github-homelab` SSH
+alias and deploy key; initial access for a new VM is handled by `bootstrap.yml` from the controller.
+`--without-secrets` skips personal key imports. `--verify` also runs the repository checks, disposable-key
+tests, and a final maintenance plan. Logs are saved under `/tmp/myansible-install-*` with private permissions.
+Dirty checkouts are rejected rather than overwritten.

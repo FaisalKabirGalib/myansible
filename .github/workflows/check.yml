@@ -20,7 +20,7 @@ jobs:
         run: .venv/bin/ansible-galaxy collection install -r requirements.yml
       - name: Check YAML, roles, and Python
         run: |
-          bash -n scripts/reset-arch-dev.sh
+          for script in scripts/*.sh; do bash -n "$script"; done
           .venv/bin/yamllint .
           .venv/bin/ansible-lint --offline roles site.yml bootstrap.yml local.yml \
             remote_server.yml gpg_setup.yml ssh_deploy_key.yml

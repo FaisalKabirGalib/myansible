@@ -7,7 +7,7 @@ setup:
     uv run --locked ansible-galaxy collection install -r requirements.yml
 
 check:
-    bash -n scripts/reset-arch-dev.sh
+    for script in scripts/*.sh; do bash -n "$script"; done
     uv run --locked yamllint .
     uv run --locked ansible-lint --offline roles site.yml bootstrap.yml local.yml remote_server.yml gpg_setup.yml ssh_deploy_key.yml
     uv run --locked ruff check tests
