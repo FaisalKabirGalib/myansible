@@ -7,6 +7,7 @@ setup:
     uv run --locked ansible-galaxy collection install -r requirements.yml
 
 check:
+    bash -n scripts/reset-arch-dev.sh
     uv run --locked yamllint .
     uv run --locked ansible-lint --offline roles site.yml bootstrap.yml local.yml remote_server.yml gpg_setup.yml ssh_deploy_key.yml
     uv run --locked ruff check tests
@@ -34,3 +35,9 @@ update-dotfiles host *args:
 
 test:
     uv run --locked python tests/gpg_integration.py
+
+reset-plan:
+    bash scripts/reset-arch-dev.sh --plan
+
+reset:
+    bash scripts/reset-arch-dev.sh --apply

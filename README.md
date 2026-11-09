@@ -82,3 +82,35 @@ just test
 `check` runs YAML linting, Ansible linting and syntax checks, and Python linting/format checks. `test` needs passwordless sudo and Git, OpenSSH, GnuPG, pass, and Stow. It generates disposable vaulted keys and local Git repositories, tests the real SSH/dotfiles/GPG roles, checks encryption/decryption and idempotency, and confirms a Stow conflict preserves the existing file. It uses an isolated home directory and removes the fixtures afterward. It never reads the real vault password or decrypts real password-store entries.
 
 GitHub Actions runs these checks on pushes and pull requests using `uv.lock` and `requirements.yml`. To upgrade tooling deliberately, update the lockfile and collection pins, run the checks, and apply twice to a test machine; the second run should report `changed=0`.
+
+## Undo the arch-dev setup
+
+Run the standalone reset script **on arch-dev as galib**:
+
+```sh
+bash scripts/reset-arch-dev.sh --plan
+bash scripts/reset-arch-dev.sh --apply
+```
+
+`just reset-plan` and `just reset` are equivalent shortcuts. The default is a read-only preview.
+
+Apply archives the full home directory and Docker state under a new, root-only `/var/backups/myansible-reset-*`
+folder. It verifies those archives before removal, preserves `.ssh` and checks its file hashes afterward, and
+changes the login shell to Bash. It removes every explicit package outside the script's baseline allowlist,
+including unused dependencies; Ansible/Python, SSH, sudo, and the base OS remain. It then deletes all home
+contents except `.ssh`, including projects, credentials outside `.ssh`, and this repository. Docker and
+containerd data are also removed. Earlier backups remain available.
+
+The script rejects other hosts/users, SSH symlinks, mounted home filesystems, and plans that remove a protected
+package. It stages itself under `/tmp` so deleting the checkout does not interrupt execution. Archive or package
+errors stop the reset. The backup includes a package list, the original account entry, a copy of the script,
+and `reset.log`. Apply leaves the development environment uninstalled.
+
+To reinstall afterward:
+
+```sh
+sudo pacman -S --needed git
+git clone --branch server --single-branch https://github.com/FaisalKabirGalib/myansible.git ~/myansible
+cd ~/myansible
+ansible-playbook site.yml --limit arch-dev -c local -e manage_personal_keys=true --ask-vault-pass
+```
