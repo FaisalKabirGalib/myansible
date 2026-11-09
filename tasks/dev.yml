@@ -1,13 +1,4 @@
-- name: Install Typescript Packages
-  package:
-    name:
-      - npm
-      - go
-      - tldr
-      - lazydocker
-    state: present
-
-  tags:
-    - dev
-    - Install
-    - node
+---
+- name: Use shared packages tasks
+  ansible.builtin.import_role:
+    name: packages

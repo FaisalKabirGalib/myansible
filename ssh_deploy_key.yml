@@ -1,5 +1,8 @@
 ---
-- name: Add GitHub Actions Deploy Key
+- name: Configure SSH access
   hosts: localhost
-  tasks:
-    - include_tasks: tasks/ssh_deploy_key.yml
+  become: false
+  roles:
+    - role: ssh
+      tags:
+        - ssh

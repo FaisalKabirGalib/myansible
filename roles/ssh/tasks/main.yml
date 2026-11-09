@@ -1,0 +1,39 @@
+---
+- name: Repair ownership of the user SSH directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ ssh_private_key_destination | dirname }}"
+    state: directory
+    owner: "{{ target_user }}"
+    group: "{{ target_group }}"
+    recurse: true
+- name: Restrict access to the SSH directory
+  ansible.builtin.file:
+    path: "{{ ssh_private_key_destination | dirname }}"
+    state: directory
+    mode: '0700'
+- name: Install the vaulted SSH private key
+  ansible.builtin.copy:
+    src: "{{ ssh_private_key_source }}"
+    dest: "{{ ssh_private_key_destination }}"
+    mode: '0600'
+    backup: true
+  no_log: true
+  when: manage_personal_keys | bool
+  tags:
+    - secrets
+- name: Install the SSH public key
+  ansible.builtin.copy:
+    src: "{{ ssh_private_key_source }}.pub"
+    dest: "{{ ssh_private_key_destination }}.pub"
+    mode: '0644'
+  when: manage_personal_keys | bool
+  tags:
+    - secrets
+- name: Install configured authorized public keys
+  ansible.builtin.lineinfile:
+    path: "{{ target_home }}/.ssh/authorized_keys"
+    line: "{{ lookup('ansible.builtin.file', item) }}"
+    create: true
+    mode: '0600'
+  loop: "{{ ssh_authorized_key_files }}"

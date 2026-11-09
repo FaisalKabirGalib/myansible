@@ -1,16 +1,6 @@
-- name: Arch Setup
-  hosts: localhost
-  become: yes
+---
+- name: Use the shared environment playbook
+  ansible.builtin.import_playbook: site.yml
   vars:
-    source_key: "./ssh/id_rsa"
-    dest_key: "{{ lookup('env', 'HOME') }}/.ssh/id_rsa"
-  tasks:
-    - include_tasks: tasks/git_setup.yml
-    - include_tasks: tasks/dotfiles.yml
-    - include_tasks: tasks/zsh.yml
-    - include_tasks: tasks/nvim.yml
-    - include_tasks: tasks/tmux.yml
-    - include_tasks: tasks/dev.yml
-    - include_tasks: tasks/ssh.yml
-    - include_tasks: tasks/ssh_deploy_key.yml
-    - include_tasks: tasks/gpg_pass.yml
+    target_hosts: localhost
+    manage_personal_keys: true

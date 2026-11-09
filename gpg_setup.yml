@@ -1,7 +1,20 @@
 ---
-- name: GPG and Password Manager Setup
+- name: Configure personal GPG and pass
   hosts: localhost
-  become: yes
-  connection: local
-  tasks:
-    - include_tasks: tasks/gpg_pass.yml
+  become: false
+  pre_tasks:
+    - name: Require the intended unprivileged Arch Linux user
+      ansible.builtin.assert:
+        that:
+          - "ansible_facts['os_family'] == 'Archlinux'"
+          - "ansible_facts['user_id'] != 'root'"
+          - "ansible_facts['user_id'] == target_user"
+          - "expected_hostname is not defined or ansible_facts['hostname'] == expected_hostname"
+        fail_msg: Select the intended Arch Linux host and connect as its regular user.
+      tags:
+        - always
+  roles:
+    - role: gpg_pass
+      tags:
+        - gpg-pass
+        - secrets

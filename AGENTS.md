@@ -2,6 +2,22 @@
 
 This document provides instructions for AI coding agents working in this Ansible repository.
 
+## Current workflow
+
+Use `site.yml` with `inventory/hosts.yml` for maintenance. Change host settings in `host_vars/` and group settings in
+`group_vars/`; implement behavior in `roles/`. Legacy playbooks and `tasks/` files delegate to these roles.
+
+- `just setup`: install locked tooling and collections.
+- `just check`: lint and syntax checks.
+- `just test`: disposable-key integration tests; requires passwordless sudo.
+- `just plan arch-dev`: check mode without personal secrets.
+- `just apply arch-dev`: routine maintenance.
+- `just full arch-dev`: full maintenance with a vault prompt.
+- `just bootstrap arch-dev`: initial repository access, requiring controller GitHub authentication.
+
+Never run a playbook against the production homelab host merely to test this repository. Use arch-dev or disposable
+fixtures. Preserve dirty dotfile checkouts; use the explicit update command only after resolving local changes.
+
 ## Project Overview
 
 This is an Ansible playbook collection for system configuration, targeting Arch Linux and Ubuntu. It handles dotfiles, SSH, GPG, password manager (pass), and development environment setup.
@@ -85,13 +101,11 @@ ansible-playbook local.yml --list-tags
 ### Docker Testing
 
 ```bash
-# Build and run in Docker
-docker build -t ansible-test .
-docker run -it ansible-test
-
-# Build with specific tags
-docker build --build-arg TAGS="--tags ssh" -t ansible-test .
+docker build -t myansible-test .
+docker run --rm myansible-test
 ```
+
+The container runs the disposable role integration test as an unprivileged user with sudo.
 
 ## Code Style Guidelines
 
@@ -262,28 +276,25 @@ tags:
     state: present
 ```
 
-### File Structure
+#### File Structure
 
-```
+```text
 myansible/
-├── local.yml           # Main local playbook
-├── remote_server.yml   # Remote server playbook
-├── gpg_setup.yml       # GPG-specific playbook
-├── test.yml            # Test playbook
-├── tasks/              # Task files (included by playbooks)
-│   ├── dev.yml
-│   ├── dotfiles.yml
-│   ├── git_setup.yml
-│   ├── gpg_pass.yml
-│   ├── nvim.yml
-│   ├── ssh.yml
-│   ├── tmux.yml
-│   └── zsh.yml
-├── vars/               # Variables (vault-encrypted secrets)
-│   └── secrets.yml
-├── keys/               # GPG keys
-├── ssh/                # SSH keys
-└── Dockerfile          # Docker testing
+├── site.yml
+├── bootstrap.yml
+├── inventory/hosts.yml
+├── group_vars/
+├── host_vars/
+├── roles/
+├── tasks/                  Legacy role delegates
+├── tests/gpg_integration.py
+├── justfile
+├── pyproject.toml
+├── uv.lock
+├── requirements.yml
+├── vars/secrets.yml        Vault encrypted
+├── keys/
+└── ssh/
 ```
 
 ### Best Practices

@@ -1,17 +1,9 @@
-FROM archlinux:latest AS base
-ARG TAGS
-WORKDIR /usr/local/bin
-USER root
-RUN pacman -Sy
-RUN pacman -S --noconfirm ansible curl git base-devel neovim
-
-FROM base AS prime
-ARG TAGS
-USER root
-WORKDIR /root
-
-FROM prime
-COPY . .
-CMD ["sh", "-c", "ansible-playbook $TAGS local.yml"]
-
-
+FROM archlinux:base-devel
+RUN pacman -Syu --needed --noconfirm ansible git stow gnupg pass openssh sudo python-yaml \
+    && useradd --create-home tester \
+    && printf 'tester ALL=(ALL) NOPASSWD: ALL\n' > /etc/sudoers.d/tester \
+    && chmod 0440 /etc/sudoers.d/tester
+WORKDIR /workspace
+COPY --chown=tester:tester . .
+USER tester
+CMD ["python", "tests/gpg_integration.py"]

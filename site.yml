@@ -1,0 +1,33 @@
+---
+- name: Maintain the development environment
+  hosts: "{{ target_hosts | default('servers') }}"
+  become: false
+  pre_tasks:
+    - name: Require the intended unprivileged Arch Linux user
+      ansible.builtin.assert:
+        that:
+          - "ansible_facts['os_family'] == 'Archlinux'"
+          - "ansible_facts['user_id'] != 'root'"
+          - "ansible_facts['user_id'] == target_user"
+          - "expected_hostname is not defined or ansible_facts['hostname'] == expected_hostname"
+        fail_msg: Select the intended Arch Linux host and connect as its regular user.
+      tags:
+        - always
+  roles:
+    - role: packages
+      tags:
+        - packages
+    - role: ssh
+      tags:
+        - ssh
+    - role: dotfiles
+      tags:
+        - dotfiles
+    - role: dev_tools
+      tags:
+        - dev
+    - role: gpg_pass
+      when: manage_personal_keys | bool
+      tags:
+        - gpg-pass
+        - secrets

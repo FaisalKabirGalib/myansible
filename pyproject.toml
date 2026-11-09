@@ -1,0 +1,17 @@
+[project]
+name = "myansible-checks"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+  "ansible-core>=2.19,<2.23",
+  "ansible-lint>=25,<27",
+  "yamllint>=1.35,<2",
+  "pyyaml>=6,<7",
+  "ruff>=0.11,<1",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+line-length = 110

@@ -1,8 +1,8 @@
+---
 - name: Test sudo privileged
   hosts: localhost
-  become: yes
-  gather_facts: yes
-
+  become: true
+  gather_facts: true
   tasks:
     - name: Check if system is Arch Linux
       ansible.builtin.command: cat /etc/os-release

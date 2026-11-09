@@ -1,0 +1,106 @@
+---
+- name: Create user tool directories
+  ansible.builtin.file:
+    path: "{{ target_home }}/{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - .local/bin
+    - .local/share
+    - .config
+    - projects
+- name: Configure the user Git identity
+  community.general.git_config:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    scope: global
+  loop:
+    - name: user.name
+      value: "{{ dev_tools_git_name }}"
+    - name: user.email
+      value: "{{ dev_tools_git_email }}"
+- name: Install coding assistant CLIs for the user
+  community.general.npm:
+    name: "{{ item }}"
+    global: true
+    state: present
+  environment:
+    NPM_CONFIG_PREFIX: "{{ target_home }}/.local"
+  loop: "{{ dev_tools_npm_packages }}"
+- name: Inspect the Claude Code native launcher
+  ansible.builtin.stat:
+    path: "{{ target_home }}/.local/lib/node_modules/@anthropic-ai/claude-code/bin/claude.exe"
+  register: dev_tools_claude_launcher
+- name: Finish Claude Code native binary installation
+  ansible.builtin.command:
+    argv:
+      - node
+      - install.cjs
+    chdir: "{{ target_home }}/.local/lib/node_modules/@anthropic-ai/claude-code"
+  when: dev_tools_claude_launcher.stat.exists and dev_tools_claude_launcher.stat.size < 4096
+  changed_when: true
+- name: Verify installed coding assistant CLIs
+  ansible.builtin.command:
+    argv:
+      - "{{ item }}"
+      - --version
+  loop:
+    - "{{ target_home }}/.local/bin/claude"
+    - "{{ target_home }}/.local/bin/codex"
+    - /usr/bin/opencode
+  changed_when: false
+- name: Clone Zinit
+  ansible.builtin.git:
+    repo: "{{ dev_tools_zinit_repo }}"
+    version: "{{ dev_tools_zinit_revision }}"
+    dest: "{{ target_home }}/.local/share/zinit/zinit.git"
+    update: false
+- name: Create the NVM user directory
+  ansible.builtin.file:
+    path: "{{ target_home }}/.config/nvm/alias"
+    state: directory
+    mode: '0755'
+- name: Link the packaged NVM scripts at the configured paths
+  ansible.builtin.file:
+    src: "/usr/share/nvm/{{ item }}"
+    dest: "{{ target_home }}/.config/nvm/{{ item }}"
+    state: link
+  loop:
+    - nvm.sh
+    - nvm-exec
+    - bash_completion
+- name: Use the system Node installation by default
+  ansible.builtin.copy:
+    content: |
+      system
+    dest: "{{ target_home }}/.config/nvm/alias/default"
+    mode: '0644'
+    force: false
+- name: Clone the tmux plugin manager
+  ansible.builtin.git:
+    repo: "{{ dev_tools_tpm_repo }}"
+    version: "{{ dev_tools_tpm_revision }}"
+    dest: "{{ target_home }}/.config/tmux/plugins/tpm"
+    update: false
+- name: Use Zsh as the login shell
+  become: true
+  ansible.builtin.user:
+    name: "{{ target_user }}"
+    shell: /usr/bin/zsh
+- name: Create the legacy tmux configuration directory
+  ansible.builtin.file:
+    path: "{{ target_home }}/.tmux"
+    state: directory
+    mode: '0755'
+- name: Share tmux plugins with the legacy configuration
+  ansible.builtin.file:
+    src: "{{ target_home }}/.config/tmux/plugins"
+    dest: "{{ target_home }}/.tmux/plugins"
+    state: link
+- name: Enable Docker for development
+  become: true
+  ansible.builtin.systemd_service:
+    name: docker
+    enabled: true
+    state: started
+  when: dev_tools_docker | bool

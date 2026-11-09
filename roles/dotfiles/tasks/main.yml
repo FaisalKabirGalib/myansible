@@ -1,0 +1,43 @@
+---
+- name: Clone the selected dotfiles revision
+  ansible.builtin.git:
+    repo: "{{ dotfiles_repo }}"
+    dest: "{{ dotfiles_destination }}"
+    version: "{{ dotfiles_revision }}"
+    update: "{{ dotfiles_update }}"
+    force: false
+- name: Inspect the dotfiles checkout
+  ansible.builtin.stat:
+    path: "{{ dotfiles_destination }}/.git"
+  register: dotfiles_checkout
+- name: Create the dotfiles configuration directory
+  ansible.builtin.file:
+    path: "{{ target_home }}/.config/dotfiles"
+    state: directory
+    mode: '0755'
+- name: Record the selected dotfile packages
+  ansible.builtin.copy:
+    dest: "{{ target_home }}/.config/dotfiles/packages"
+    content: |
+      {{ dotfiles_packages | join('
+      ') }}
+    mode: '0644'
+- name: Preview dotfile links without modifying files
+  ansible.builtin.command:
+    argv: "{{ ['stow', '--simulate', '--verbose=1', '--no-folding', '-S', '-t', target_home] + dotfiles_packages\
+      \ }}"
+    chdir: "{{ dotfiles_destination }}"
+  register: dotfiles_preview
+  changed_when: false
+  check_mode: false
+  when: dotfiles_checkout.stat.exists
+- name: Link the selected dotfiles
+  ansible.builtin.command:
+    argv: "{{ ['stow', '--no-folding', '-R', '-t', target_home] + dotfiles_packages }}"
+    chdir: "{{ dotfiles_destination }}"
+  when:
+    - dotfiles_checkout.stat.exists
+    - >-
+      'LINK:' in dotfiles_preview.stderr or 'UNLINK:' in dotfiles_preview.stderr or
+      'MKDIR:' in dotfiles_preview.stderr
+  changed_when: true

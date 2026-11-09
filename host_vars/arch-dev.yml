@@ -1,0 +1,7 @@
+---
+ansible_user: galib
+ansible_python_interpreter: /usr/bin/python
+expected_hostname: arch-dev
+dotfiles_repo: git@github-homelab:FaisalKabirGalib/homelab.git
+ssh_authorized_key_files:
+  - "{{ playbook_dir }}/git_keys/git_deploy.pub"

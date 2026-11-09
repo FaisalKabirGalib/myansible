@@ -1,24 +1,4 @@
-- name: Install packages
-  package:
-    name:
-      - stow
-    state: present
-  tags:
-    - dotfiles
-    - install
-
-- name: Clone dotfiles repository
-  git:
-    repo: "https://github.com/FaisalKabirGalib/dotfiles.git" # Replace with your repository URL
-    dest: "{{ lookup('env','HOME') }}/dotfiles"
-    version: server # You can specify a branch, tag, or commit here
-  tags:
-    - dotfiles
-
-- name: Stow dotfiles
-  shell: |
-    cd "{{ lookup('env','HOME') }}/dotfiles" && ./stowup
-  args:
-    creates: "{{ lookup('env','HOME') }}/.zshrc"  # Prevents running if dotfiles are already stowed
-  tags:
-    - dotfiles
+---
+- name: Use shared dotfiles tasks
+  ansible.builtin.import_role:
+    name: dotfiles

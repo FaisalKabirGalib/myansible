@@ -1,0 +1,74 @@
+---
+- name: Create the SSH directory
+  ansible.builtin.file:
+    path: "{{ target_home }}/.ssh"
+    state: directory
+    mode: '0700'
+- name: Generate a machine-specific homelab deploy key
+  ansible.builtin.command:
+    argv:
+      - ssh-keygen
+      - -q
+      - -t
+      - ed25519
+      - -N
+      - ''
+      - -C
+      - "{{ bootstrap_key_title }}"
+      - -f
+      - "{{ bootstrap_key }}"
+    creates: "{{ bootstrap_key }}"
+- name: Read the deploy public key
+  ansible.builtin.slurp:
+    src: "{{ bootstrap_key }}.pub"
+  register: bootstrap_public_key
+- name: Read registered homelab deploy keys
+  ansible.builtin.command:
+    argv:
+      - gh
+      - api
+      - "repos/{{ bootstrap_repository }}/keys"
+  delegate_to: localhost
+  register: bootstrap_registered_keys
+  changed_when: false
+  check_mode: false
+- name: "Register this VM's read-only homelab deploy key"
+  ansible.builtin.command:
+    argv:
+      - gh
+      - api
+      - --method
+      - POST
+      - "repos/{{ bootstrap_repository }}/keys"
+      - --input
+      - '-'
+    stdin: "{{ {'title': bootstrap_key_title, 'key': bootstrap_public_key.content | b64decode | trim,\
+      \ 'read_only': true} | to_json }}"
+  delegate_to: localhost
+  when: "((bootstrap_public_key.content | b64decode).split()[:2] | join(' ')) not in (bootstrap_registered_keys.stdout\
+    \ | from_json | map(attribute='key') | list)"
+  changed_when: true
+- name: "Read GitHub's published SSH host keys"
+  ansible.builtin.uri:
+    url: https://api.github.com/meta
+    return_content: true
+  delegate_to: localhost
+  register: bootstrap_github_metadata
+  check_mode: false
+- name: "Trust GitHub's published SSH host keys"
+  ansible.builtin.known_hosts:
+    name: github.com
+    key: "github.com {{ item }}"
+  loop: "{{ bootstrap_github_metadata.json.ssh_keys }}"
+- name: Configure the homelab Git SSH alias
+  ansible.builtin.blockinfile:
+    path: "{{ target_home }}/.ssh/config"
+    create: true
+    mode: '0600'
+    marker: '# {mark} ANSIBLE HOMELAB'
+    block: |
+      Host github-homelab
+        HostName github.com
+        User git
+        IdentityFile {{ bootstrap_key }}
+        IdentitiesOnly yes

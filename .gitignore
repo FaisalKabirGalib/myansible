@@ -8,3 +8,7 @@ CLAUDE.local.md
 # SSH Keys
 # git_keys/
 
+.venv/
+.ansible/
+__pycache__/
+*.pyc

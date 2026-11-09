@@ -1,0 +1,31 @@
+---
+name: Validate Ansible
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install fixture dependencies
+        run: sudo apt-get update && sudo apt-get install -y gnupg pass stow openssh-client
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+      - name: Install locked tooling
+        run: ~/.local/bin/uv sync --locked
+      - name: Install pinned Ansible collections
+        run: .venv/bin/ansible-galaxy collection install -r requirements.yml
+      - name: Check YAML, roles, and Python
+        run: |
+          .venv/bin/yamllint .
+          .venv/bin/ansible-lint --offline roles site.yml bootstrap.yml local.yml \
+            remote_server.yml gpg_setup.yml ssh_deploy_key.yml
+          .venv/bin/ruff check tests
+          .venv/bin/ruff format --check tests
+          .venv/bin/ansible-playbook site.yml --syntax-check
+          .venv/bin/ansible-playbook bootstrap.yml --syntax-check
+      - name: Test disposable keys and repositories
+        run: ~/.local/bin/uv run --locked python tests/gpg_integration.py

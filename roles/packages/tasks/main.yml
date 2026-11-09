@@ -1,0 +1,6 @@
+---
+- name: Install profile packages
+  become: true
+  ansible.builtin.package:
+    name: "{{ (packages_base + packages_extra) | unique }}"
+    state: present

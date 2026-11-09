@@ -1,0 +1,86 @@
+---
+target_user: "{{ ansible_facts['user_id'] }}"
+target_group: "{{ ansible_facts['user_gid'] }}"
+target_home: "{{ ansible_facts['user_dir'] }}"
+manage_personal_keys: false
+packages_base:
+  - base-devel
+  - git
+  - github-cli
+  - openssh
+  - stow
+  - rsync
+  - zsh
+  - zsh-completions
+  - fzf
+  - fd
+  - eza
+  - zoxide
+  - bat
+  - tmux
+  - neovim
+  - nodejs
+  - npm
+  - bun
+  - nvm
+  - luarocks
+  - ripgrep
+  - lazygit
+  - lazydocker
+  - tldr
+  - go
+  - python
+  - uv
+  - rust
+  - mise
+  - docker
+  - docker-compose
+  - docker-buildx
+  - kubectl
+  - helm
+  - pass
+  - gnupg
+  - jq
+  - curl
+  - wget
+  - unzip
+  - zip
+  - btop
+  - htop
+  - opencode
+packages_extra: []
+dotfiles_repo: git@github.com:FaisalKabirGalib/homelab.git
+dotfiles_revision: 7afa6311960a492e2494bbcbfbc10039b940ee37
+dotfiles_destination: "{{ target_home }}/homelab"
+dotfiles_update: false
+dotfiles_packages:
+  - zsh
+  - nvim
+  - tmux
+  - p10k
+  - bin
+  - opencode
+  - claude-code
+  - codex
+dev_tools_git_name: Faisal Kabir Galib
+dev_tools_git_email: faisalkabirgalib@gmail.com
+dev_tools_npm_packages:
+  - '@openai/codex'
+  - '@anthropic-ai/claude-code'
+dev_tools_zinit_repo: https://github.com/zdharma-continuum/zinit.git
+dev_tools_tpm_repo: https://github.com/tmux-plugins/tpm.git
+dev_tools_docker: false
+ssh_private_key_source: "{{ playbook_dir }}/ssh/id_rsa"
+ssh_private_key_destination: "{{ target_home }}/.ssh/id_rsa"
+ssh_authorized_key_files: []
+gpg_pass_home: "{{ target_home }}/.gnupg"
+gpg_pass_public_key_source: "{{ playbook_dir }}/keys/pass_public.pgp"
+gpg_pass_private_key_source: "{{ playbook_dir }}/keys/pass_private.pgp"
+gpg_pass_repository: https://github.com/FaisalKabirGalib/mypass.git
+gpg_pass_revision: main
+gpg_pass_store: "{{ target_home }}/.password-store"
+bootstrap_repository: FaisalKabirGalib/homelab
+bootstrap_key: "{{ target_home }}/.ssh/id_ed25519_homelab"
+bootstrap_key_title: "{{ inventory_hostname }}-homelab-readonly"
+dev_tools_zinit_revision: cb4968123979cf073384e93aa8066d8fd450580f
+dev_tools_tpm_revision: e261deb1b47614eed3400089ce7197dc68acc4eb

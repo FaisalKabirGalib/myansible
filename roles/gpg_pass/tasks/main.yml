@@ -1,0 +1,123 @@
+---
+- name: Install GPG dependencies
+  become: true
+  ansible.builtin.package:
+    name:
+      - gnupg
+      - pass
+      - git
+    state: present
+- name: Repair ownership of the user GPG directory
+  become: true
+  ansible.builtin.file:
+    path: "{{ gpg_pass_home }}"
+    state: directory
+    owner: "{{ target_user }}"
+    group: "{{ target_group }}"
+    recurse: true
+- name: Restrict access to the user GPG directory
+  ansible.builtin.file:
+    path: "{{ gpg_pass_home }}"
+    state: directory
+    mode: '0700'
+- name: Create private key storage for an already running GPG agent
+  ansible.builtin.file:
+    path: "{{ gpg_pass_home }}/private-keys-v1.d"
+    state: directory
+    mode: '0700'
+- name: Copy the configured public key to the target
+  ansible.builtin.copy:
+    src: "{{ gpg_pass_public_key_source }}"
+    dest: "{{ gpg_pass_home }}/configured-public-key.asc"
+    mode: '0600'
+- name: Read the configured public key fingerprint
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --homedir
+      - "{{ gpg_pass_home }}"
+      - --batch
+      - --with-colons
+      - --show-keys
+      - "{{ gpg_pass_home }}/configured-public-key.asc"
+  register: gpg_pass_public_key
+  changed_when: false
+  check_mode: false
+- name: Select the configured GPG fingerprint
+  ansible.builtin.set_fact:
+    gpg_pass_fingerprint: "{{ (gpg_pass_public_key.stdout_lines | select('match', '^fpr:') | first).split(':')[9]\
+      \ }}"
+- name: Import the vaulted GPG private key without a temporary file
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --homedir
+      - "{{ gpg_pass_home }}"
+      - --batch
+      - --status-fd
+      - '1'
+      - --import
+    stdin: "{{ lookup('ansible.builtin.unvault', gpg_pass_private_key_source) }}"
+    stdin_add_newline: false
+  register: gpg_pass_import
+  vars:
+    gpg_pass_import_counts: |-
+      {{ (gpg_pass_import.stdout_lines | select('search', 'IMPORT_RES ') | first).split()[2:]
+         | map('int') | list }}
+  changed_when: gpg_pass_import_counts[2] + (gpg_pass_import_counts[5:9] | sum) + gpg_pass_import_counts[10]
+    > 0
+  no_log: true
+- name: Inspect trust for the configured key
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --homedir
+      - "{{ gpg_pass_home }}"
+      - --batch
+      - --with-colons
+      - --list-keys
+      - "{{ gpg_pass_fingerprint }}"
+  register: gpg_pass_trust
+  changed_when: false
+  when: not ansible_check_mode
+- name: Trust the configured key
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --homedir
+      - "{{ gpg_pass_home }}"
+      - --batch
+      - --import-ownertrust
+    stdin: "{{ gpg_pass_fingerprint }}:6:"
+  when:
+    - not ansible_check_mode
+    - "(gpg_pass_trust.stdout_lines | select('match', '^pub:u:') | list | length) == 0"
+  changed_when: true
+- name: Clone the password repository
+  ansible.builtin.git:
+    repo: "{{ gpg_pass_repository }}"
+    dest: "{{ gpg_pass_store }}"
+    version: "{{ gpg_pass_revision }}"
+    update: false
+- name: Initialize pass with the configured key
+  ansible.builtin.command:
+    argv:
+      - pass
+      - init
+      - "{{ gpg_pass_fingerprint }}"
+    creates: "{{ gpg_pass_store }}/.gpg-id"
+  environment:
+    PASSWORD_STORE_DIR: "{{ gpg_pass_store }}"
+    GNUPGHOME: "{{ gpg_pass_home }}"
+- name: Verify the configured secret key is available to the user
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --homedir
+      - "{{ gpg_pass_home }}"
+      - --batch
+      - --list-secret-keys
+      - "{{ gpg_pass_fingerprint }}"
+  changed_when: false
+  when: not ansible_check_mode
+  no_log: true

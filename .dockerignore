@@ -1,0 +1,4 @@
+.git
+.venv
+.ansible
+__pycache__

@@ -1,13 +1,4 @@
-- name: Install nvim dependency
-  package:
-    name:
-      - nodejs
-      - neovim
-      - luarocks
-      - ripgrep
-      - lazygit
-    state: present
-  tags:
-    - nvim
-    - install
-  failed_when: false
+---
+- name: Use shared packages tasks
+  ansible.builtin.import_role:
+    name: packages
